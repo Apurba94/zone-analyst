@@ -1,0 +1,127 @@
+/* Zone Analyst — shared site chrome.
+ *
+ * Scoping rule: every selector here is namespaced (.sz-nav, .sz-foot, or
+ * body.sz-page). The three original tool pages style bare `header`, `footer`,
+ * `table` and `h2` elements in their own <style> blocks; namespacing keeps this
+ * file from quietly changing them. Their inline styles load after this file,
+ * so on any shared token they win.
+ */
+
+:root{
+  --paper:#E9E0CC; --paper-2:#E1D6BE; --ink:#16324A; --ink-soft:#516A7C;
+  --rule:#C3B69A; --caution:#A6205F; --sea:#3F7CA6;
+  /* Status pair, validated for colour-vision deficiency (deutan/protan/tritan
+     ΔE ≥ 20). The site's older green/magenta pair fails that check (ΔE 2.0),
+     so status is always this pair plus a glyph and a word — never hue alone. */
+  --ok:#1B6CA8; --ok-tint:rgba(27,108,168,.15);
+  --short:#A8560A; --short-tint:rgba(168,86,10,.17);
+  --shadow:rgba(22,50,74,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1A22; --paper-2:#132430; --ink:#CBDDE8; --ink-soft:#8AA3B1;
+    --rule:#263A46; --caution:#E4629A; --sea:#6FB3D6;
+    --ok:#3A93D0; --ok-tint:rgba(58,147,208,.20);
+    --short:#CC8228; --short-tint:rgba(204,130,40,.22);
+    --shadow:rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1A22; --paper-2:#132430; --ink:#CBDDE8; --ink-soft:#8AA3B1;
+  --rule:#263A46; --caution:#E4629A; --sea:#6FB3D6;
+  --ok:#3A93D0; --ok-tint:rgba(58,147,208,.20);
+  --short:#CC8228; --short-tint:rgba(204,130,40,.22);
+  --shadow:rgba(0,0,0,.4);
+}
+
+/* ---------- navigation ---------- */
+.sz-nav{background:var(--paper-2);border-bottom:1px solid var(--rule);
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.sz-nav-in{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:18px;min-height:52px}
+.sz-brand{display:flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none;
+  font-family:Spectral,Georgia,serif;font-size:18px;letter-spacing:-.01em;white-space:nowrap}
+.sz-brand svg{width:22px;height:22px;flex:none;color:var(--ink)}
+.sz-brand .ring{fill:none;stroke:var(--caution);stroke-width:2}
+.sz-brand .core{fill:var(--sea);opacity:.55}
+.sz-links{display:flex;gap:2px;list-style:none;margin:0 0 0 auto;padding:0;
+  overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sz-links::-webkit-scrollbar{display:none}
+.sz-links a{display:block;padding:15px 10px 13px;color:var(--ink-soft);text-decoration:none;
+  font-size:14px;border-bottom:2px solid transparent;white-space:nowrap}
+.sz-links a:hover{color:var(--ink)}
+.sz-links a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:500}
+.sz-nav a:focus-visible{outline:2px solid var(--caution);outline-offset:-2px}
+@media (max-width:720px){
+  .sz-nav-in{flex-wrap:wrap;gap:0;padding:0 16px}
+  .sz-brand{padding:12px 0 2px;width:100%}
+  .sz-links{margin:0 -16px;padding:0 6px;width:calc(100% + 32px)}
+  .sz-links a{padding:9px 7px 10px;font-size:13.5px}
+}
+
+/* ---------- footer ---------- */
+/* `footer.sz-foot` outranks the playbook's bare `footer{}` rule. */
+footer.sz-foot{margin:0;border-top:1px solid var(--rule);background:var(--paper-2);
+  padding:22px 0 34px;font-family:Archivo,"Helvetica Neue",Arial,sans-serif;
+  font-size:13px;line-height:1.55;color:var(--ink-soft)}
+.sz-foot-in{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;
+  gap:6px 28px;justify-content:space-between}
+.sz-foot-in p{margin:0;max-width:78ch}
+.sz-foot a{color:var(--ink-soft)}
+@media (max-width:720px){.sz-foot-in{padding:0 16px}}
+
+/* ---------- components for the newer pages (body.sz-page only) ---------- */
+body.sz-page{margin:0;background:var(--paper);color:var(--ink);
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;font-size:15.5px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+body.sz-page *{box-sizing:border-box}
+.sz-page .wrap{max-width:1180px;margin:0 auto;padding:30px 20px 64px}
+.sz-page .wrap.narrow{max-width:800px}
+@media (max-width:720px){.sz-page .wrap{padding:24px 16px 52px}}
+.sz-page .kicker{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 8px}
+.sz-page h1{font-family:Spectral,Georgia,serif;font-weight:400;font-size:clamp(28px,4.2vw,40px);
+  letter-spacing:-.015em;line-height:1.12;margin:0 0 10px}
+.sz-page h2{font-family:Spectral,Georgia,serif;font-weight:600;font-size:15px;letter-spacing:.04em;
+  text-transform:uppercase;margin:0 0 10px}
+.sz-page h3{font-family:Spectral,Georgia,serif;font-weight:600;font-size:19px;line-height:1.3;margin:0 0 6px}
+.sz-page p{margin:0 0 12px}
+.sz-page .lede{font-family:Spectral,Georgia,serif;font-size:18px;line-height:1.5;color:var(--ink-soft);max-width:62ch}
+.sz-page a{color:var(--ink)}
+.sz-page .muted{color:var(--ink-soft)}
+.sz-page .small{font-size:13px;line-height:1.5;color:var(--ink-soft)}
+.sz-page .num{font-family:Spectral,Georgia,serif;font-variant-numeric:tabular-nums}
+
+.sz-page .panel{border:1px solid var(--rule);background:var(--paper-2)}
+.sz-page .panel + .panel{margin-top:16px}
+.sz-page .panel > h2{font-size:14px;letter-spacing:.01em;text-transform:none;margin:0;
+  padding:10px 14px;border-bottom:1px solid var(--rule)}
+.sz-page .panel-body{padding:13px 14px}
+
+.sz-page .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sz-page table{width:100%;border-collapse:collapse;font-size:14px}
+.sz-page th,.sz-page td{text-align:left;padding:7px 10px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.sz-page th{font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft)}
+.sz-page td.r,.sz-page th.r{text-align:right}
+
+/* status chip: hue + glyph + word, so no reader depends on hue alone */
+.sz-page .chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;
+  padding:2px 8px 2px 6px;border:1px solid var(--rule);white-space:nowrap;color:var(--ink)}
+.sz-page .chip::before{font-weight:700}
+.sz-page .chip.ok{background:var(--ok-tint);border-color:var(--ok)}
+.sz-page .chip.ok::before{content:"✓";color:var(--ok)}
+.sz-page .chip.short{background:var(--short-tint);border-color:var(--short)}
+.sz-page .chip.short::before{content:"✕";color:var(--short)}
+.sz-page .chip.edge{background:transparent;border-color:var(--ink-soft)}
+.sz-page .chip.edge::before{content:"!";color:var(--ink-soft)}
+
+.sz-page .btn{display:inline-flex;align-items:center;gap:8px;font-family:Archivo,sans-serif;font-size:14px;
+  padding:9px 14px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);text-decoration:none;cursor:pointer}
+.sz-page .btn.quiet{background:transparent;color:var(--ink);border-color:var(--rule)}
+.sz-page .btn:hover{opacity:.92}
+.sz-page :focus-visible{outline:2px solid var(--caution);outline-offset:2px}
+
+.sz-page .note{border:1px solid var(--rule);background:var(--paper-2);padding:12px 15px;font-size:14px;color:var(--ink-soft)}
+.sz-page .note b{color:var(--ink);font-weight:600}
+.sz-page .rulebox{border-left:3px solid var(--caution);background:var(--paper-2);padding:12px 15px;
+  font-family:Spectral,Georgia,serif;font-size:16.5px;line-height:1.45}
+
+@media (prefers-reduced-motion:reduce){body.sz-page *{transition:none!important;animation:none!important}}

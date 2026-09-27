@@ -1,0 +1,12 @@
+# Normalise line endings so Windows and Linux checkouts produce identical files
+* text=auto eol=lf
+
+# Windows scripts must keep CRLF or cmd.exe misreads them
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Binary
+*.xlsx binary
+*.png  binary
+*.jpg  binary
+*.ico  binary

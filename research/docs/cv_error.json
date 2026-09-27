@@ -1,0 +1,29 @@
+{
+  "full": {
+    "n_fitted": 150,
+    "centre_err_median": 0.0011035095296940416,
+    "centre_err_p95": 0.002027109414740819,
+    "radius_err_median": 0.0008070694490034194,
+    "radius_err_p95": 0.0014736696560957655,
+    "suggested_containment_tol": 0.002947339312191531,
+    "note": "errors are fractions of the map edge length"
+  },
+  "arc90": {
+    "n_fitted": 150,
+    "centre_err_median": 0.0011322875725381203,
+    "centre_err_p95": 0.0018771308601737186,
+    "radius_err_median": 0.0007654609897693534,
+    "radius_err_p95": 0.0017226755864545769,
+    "suggested_containment_tol": 0.0034453511729091537,
+    "note": "errors are fractions of the map edge length"
+  },
+  "arc45": {
+    "n_fitted": 150,
+    "centre_err_median": 0.0017959869613127688,
+    "centre_err_p95": 0.004993305348145462,
+    "radius_err_median": 0.0011388606429263326,
+    "radius_err_p95": 0.004319711104221638,
+    "suggested_containment_tol": 0.008639422208443276,
+    "note": "errors are fractions of the map edge length"
+  }
+}

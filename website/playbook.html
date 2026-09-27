@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- sz:head -->
+<meta name="description" content="Anti-rush defence, the 1v4 clutch method, and map analysis for the 2026 tournament pool: Erangel, Miramar and Rondo.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<!-- /sz:head -->
+<title>Playbook · Zone Analyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E9E0CC; --paper-2:#E1D6BE; --ink:#16324A; --ink-soft:#516A7C;
+  --rule:#C3B69A; --caution:#A6205F; --sea:#3F7CA6; --good:#2F6B4F; --warn:#8A5410;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1A22; --paper-2:#132430; --ink:#CBDDE8; --ink-soft:#8AA3B1;
+    --rule:#263A46; --caution:#E4629A; --sea:#6FB3D6; --good:#7FC4A0; --warn:#D9A15A;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1A22; --paper-2:#132430; --ink:#CBDDE8; --ink-soft:#8AA3B1;
+  --rule:#263A46; --caution:#E4629A; --sea:#6FB3D6; --good:#7FC4A0; --warn:#D9A15A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;font-size:15.5px;line-height:1.62;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:800px;margin:0 auto;padding:34px 22px 80px}
+
+header{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:8px}
+.kicker{font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 8px}
+h1{font-family:Spectral,Georgia,serif;font-weight:400;font-size:37px;letter-spacing:-.015em;
+  margin:0 0 8px;line-height:1.1}
+.standfirst{font-family:Spectral,Georgia,serif;font-size:18px;line-height:1.5;color:var(--ink-soft);
+  margin:0;max-width:60ch}
+
+h2{font-family:Spectral,Georgia,serif;font-weight:600;font-size:15px;letter-spacing:.04em;
+  text-transform:uppercase;margin:52px 0 4px;padding-bottom:6px;border-bottom:1px solid var(--rule)}
+h2 .num{color:var(--ink-soft);font-weight:400;margin-right:9px}
+h3{font-family:Spectral,Georgia,serif;font-weight:600;font-size:21px;margin:30px 0 6px;line-height:1.25}
+h4{font-size:14px;font-weight:600;margin:20px 0 4px;color:var(--ink)}
+p{margin:0 0 13px}
+ul,ol{margin:0 0 13px;padding-left:20px}
+li{margin-bottom:6px}
+strong{font-weight:600}
+em{font-style:italic}
+
+.lede{font-family:Spectral,Georgia,serif;font-size:17px;line-height:1.5;margin:14px 0 20px}
+
+.rulebox{border-left:3px solid var(--caution);background:var(--paper-2);padding:12px 15px;
+  margin:18px 0;font-family:Spectral,Georgia,serif;font-size:16.5px;line-height:1.45}
+.rulebox b{font-weight:600}
+.note{border:1px solid var(--rule);background:var(--paper-2);padding:12px 15px;margin:18px 0;
+  font-size:14px;color:var(--ink-soft)}
+.note b{color:var(--ink);font-weight:600}
+.fail{font-size:14.5px;color:var(--ink-soft);border-top:1px dotted var(--rule);padding-top:8px;margin-top:10px}
+.fail b{color:var(--caution);font-weight:600}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th,td{text-align:left;padding:7px 10px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft)}
+td:first-child{font-weight:600;white-space:nowrap;padding-right:16px}
+
+.cat{border-top:1px solid var(--rule);padding-top:16px;margin-top:22px}
+.cat:first-of-type{border-top:0}
+.tag{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid var(--rule);padding:2px 7px;color:var(--ink-soft);margin-left:8px;
+  vertical-align:middle;font-weight:500}
+.map-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.map-head .size{font-size:13px;color:var(--ink-soft)}
+
+.toc{background:var(--paper-2);border:1px solid var(--rule);padding:14px 18px;margin:26px 0 0}
+.toc ol{margin:0;padding-left:18px;font-size:14.5px}
+.toc li{margin-bottom:3px}
+.toc a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule)}
+.toc a:hover{border-bottom-color:var(--caution)}
+footer{margin-top:56px;border-top:1px solid var(--rule);padding-top:16px;
+  font-size:13.5px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<!-- sz:nav -->
+<nav class="sz-nav" aria-label="Site">
+  <div class="sz-nav-in">
+    <a class="sz-brand" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><circle class="core" cx="12" cy="12" r="3.4"/></svg><span>Zone Analyst</span></a>
+    <ul class="sz-links"><li><a href="simulator.html">Simulator</a></li><li><a href="chart.html">Chart</a></li><li><a href="combat.html">Combat math</a></li><li><a href="playbook.html" aria-current="page">Playbook</a></li><li><a href="research.html">Research</a></li></ul>
+  </div>
+</nav>
+<!-- /sz:nav -->
+<div class="wrap">
+
+<header>
+  <p class="kicker">Competitive PUBG Mobile — squad playbook</p>
+  <h1>Holding ground, winning the duel, reading the map</h1>
+  <p class="standfirst">Anti-rush defence, weapon doctrine, the 1v4 clutch method, and a map-by-map
+  breakdown of the 2026 tournament pool.</p>
+</header>
+
+<div class="toc">
+  <ol>
+    <li><a href="#pool">What the 2026 map pool actually is</a></li>
+    <li><a href="#rush">Anti-rush defence — eight categories</a></li>
+    <li><a href="#guns">Weapons: close range, mid range, role loadouts</a></li>
+    <li><a href="#clutch">The 1v4 clutch</a></li>
+    <li><a href="#maps">Map analysis</a></li>
+    <li><a href="#drills">Drills</a></li>
+  </ol>
+</div>
+
+<h2 id="pool"><span class="num">1</span>What the 2026 map pool actually is</h2>
+
+<p class="lede">Before any map work: the tier-1 pool in 2026 is three maps, not five or six.</p>
+
+<p>Both international events this year used the same rotation. PMGO Season 1 in June ran
+<strong>three matches on Erangel, two on Miramar, one on Rondo</strong> per day. PMWC 2026 in Paris
+in August ran a six-match day opening on <strong>Rondo</strong>, then a triple-header on
+<strong>Erangel</strong>, closing with two on <strong>Miramar</strong>.</p>
+
+<p>Sanhok and Vikendi are not in that rotation. The structure around it changed too: Super League
+(PMSL) events were removed for 2026, and the ladder now runs through National Championships (PMNC)
+into four global events — PMGO S1, PMGO S2, PMWC and PMGC.</p>
+
+<div class="rulebox">
+  <b>Practical consequence.</b> If you are preparing for PMNC or an open qualifier, your scrim time
+  should be split roughly 3 : 2 : 1 across Erangel, Miramar and Rondo, matching the tournament
+  rotation. Time spent on Sanhok is time spent on a map you will not be scored on.
+</div>
+
+<div class="note">
+  <b>Check before you commit.</b> Map pools are set per event and regional PMNC formats can differ
+  from the global ones. Confirm against the official rules pack for your specific tournament rather
+  than against this page.
+</div>
+
+<h2 id="rush"><span class="num">2</span>Anti-rush defence — eight categories</h2>
+
+<p class="lede">A rush succeeds because the attacker knows when the fight starts and the defender
+finds out. Everything below buys back that half-second, or makes the half-second not matter.</p>
+
+<div class="cat">
+<h3>A. Crossfire hold <span class="tag">default setup</span></h3>
+<p>Never put four players in one building. Split 2–2 across two structures whose entrances cover
+each other. A rushing squad can only breach one at a time; the second pair shoots them in the back
+while they are committed to the doorway.</p>
+<p><strong>Setup rule:</strong> the two positions must see each other's entry points, but must be
+far enough apart that one grenade cannot touch both. If a single frag can hit both pairs, you have
+built one position with a gap in it, not two positions.</p>
+<p class="fail"><b>Failure mode:</b> both pairs holding the <em>same</em> approach. Crossfire means
+different angles on one lane, not two people watching one door from beside each other.</p>
+</div>
+
+<div class="cat">
+<h3>B. Layered defence <span class="tag">early warning</span></h3>
+<p>One player sits wide as an outer marker, watching the two most likely approach lanes. Three hold
+the core. The outer player's job is <em>not</em> to win the fight — it is to call the rush direction
+three to five seconds early and fall back.</p>
+<p>That three to five seconds is the entire difference between a defended compound and a lost one.
+It is enough time for the core to switch angles, pre-aim, and pre-place utility.</p>
+<p class="fail"><b>Failure mode:</b> the outer player tries to trade. He dies, gives no callout, and
+you are now 3v4 <em>and</em> surprised.</p>
+</div>
+
+<div class="cat">
+<h3>C. Utility denial <span class="tag">highest leverage</span></h3>
+<p>Throwables win compound fights more often than aim does. The principle: throw at the
+<em>ground they must cross</em>, not at the players.</p>
+<ul>
+  <li><strong>Molotov the entry, not the enemy.</strong> A molly in a doorway or stairwell costs
+  them five or more seconds and forces a second route — one you are already aimed at. Aiming a
+  molotov at a moving player almost always misses; aiming at a door never does.</li>
+  <li><strong>Smoke your own position, not theirs.</strong> Smoke is defensive. Use it to break an
+  angle they already have, or to cover a reposition. Smoking <em>them</em> mostly blinds you.</li>
+  <li><strong>Cook frags into cover.</strong> Throw at the rock or wall they are behind, not where
+  you last saw them. Cook to two so it detonates on arrival.</li>
+</ul>
+<p class="fail"><b>Failure mode:</b> saving utility for a fight that never comes. Grenades you carry
+to the final circle scored nothing.</p>
+</div>
+
+<div class="cat">
+<h3>D. Pre-aim discipline <span class="tag">mechanical core</span></h3>
+<p>At close range the player already ADS on the doorway wins the overwhelming majority of duels.
+Reaction time is roughly a quarter-second; the raise-and-aim animation costs more than that again.
+Nobody out-aims that gap.</p>
+<p>So: <strong>assign each player exactly one angle and forbid scanning.</strong> A player sweeping
+his camera around the room is a player who loses every duel he takes. Crosshair sits at head height
+for the distance being held, not at the floor.</p>
+<p class="fail"><b>Failure mode:</b> everyone watching the "most likely" door. Cover the unlikely
+one — that is where a competent team comes from.</p>
+</div>
+
+<div class="cat">
+<h3>E. Sound denial and bait <span class="tag">information war</span></h3>
+<p>When the rush is close, stop moving. Footsteps are the single largest information leak in the
+game, and a stationary defender is invisible to an attacker who is relying on audio.</p>
+<p>Used positively: a deliberate noise — a door opened, a vehicle engine started and abandoned —
+pulls a rush into the lane you have prepared. Bait with sound, kill with the pre-aim.</p>
+<p class="fail"><b>Failure mode:</b> repositioning "quietly" mid-rush by crouch-walking across
+floorboards. Either move before they are close, or do not move.</p>
+</div>
+
+<div class="cat">
+<h3>F. Vehicle-rush counter <span class="tag">Miramar critical</span></h3>
+<p>On open maps the rush arrives in a car, because crossing open ground on foot is suicide. The
+counter is a split, not a focus:</p>
+<ul>
+  <li><strong>Two players shoot the vehicle</strong> — driver first, then the engine block. A
+  disabled car in the open is four players stranded with no cover.</li>
+  <li><strong>Two players hold the dismount side</strong> pre-aimed. The dismount is a
+  one-and-a-half second window where all four enemies are standing still and grouped.</li>
+  <li><strong>Molotov the dismount point</strong> if you have the throw. It denies them the vehicle
+  as cover and forces them into the open.</li>
+</ul>
+<p class="fail"><b>Failure mode:</b> all four unloading into the car body. It absorbs the magazine,
+they dismount behind it with full HP, and you are all reloading at the same time.</p>
+</div>
+
+<div class="cat">
+<h3>G. Knock management <span class="tag">where the kills are</span></h3>
+<p>This is the highest-value habit on the list and the most commonly broken.</p>
+<div class="rulebox">
+  <b>Do not chase the knock. Hold the revive angle.</b> A downed enemy is bait. The revive is where
+  you get your second and third kill, because a reviving player is stationary, exposed, and has
+  removed himself from the fight.
+</div>
+<p>The mirror of the rule: <strong>when you knock someone, move immediately.</strong> They now know
+exactly where your shot came from and will focus that window.</p>
+<p class="fail"><b>Failure mode:</b> pushing out to finish a knock, getting traded by his two
+teammates holding that exact angle for the same reason you should have been.</p>
+</div>
+
+<div class="cat">
+<h3>H. Refusing the fight <span class="tag">IGL decision</span></h3>
+<p>Sometimes correct anti-rush play is to not be there. A won fight that leaves you at 40 HP with no
+utility, in a compound outside the next zone, with a third team inbound, is a loss recorded as a
+win.</p>
+<div class="rulebox">
+  <b>Decision rule:</b> if you cannot get all four players out of the fight, healed, and into the
+  next zone within the shrink timer, do not take the fight. Rotate before they arrive.
+</div>
+<p>This is where circle reading pays for itself. Knowing the next zone before you commit turns a
+coin-flip fight into a decision.</p>
+</div>
+
+<h4>Five habits that lose defended compounds</h4>
+<ol>
+  <li>Healing during the rush. You are out of the fight for six to eight seconds and they know it.</li>
+  <li>All four peeking the same window.</li>
+  <li>Reviving in the open, in line of sight, under fire.</li>
+  <li>Over-rotating to the first sound — that is often the distraction, not the rush.</li>
+  <li>Reloading together. Stagger it; someone is always loaded.</li>
+</ol>
+
+<h2 id="guns"><span class="num">3</span>Weapons: close range, mid range, role loadouts</h2>
+
+<div class="note">
+  <b>On tier lists.</b> I could not verify the current patch's balance numbers against a reliable
+  source. The specific damage and recoil figures circulating on top-up and affiliate sites
+  contradict each other and several look fabricated. What follows is built on properties that do
+  not flip patch to patch — calibre, fire rate class, recoil class, availability — plus a method at
+  the end for measuring the current meta yourself instead of trusting anyone's list, including this
+  one.
+</div>
+
+<h3>Close range (0–30 m)</h3>
+
+<p>For anti-rush the requirement is narrow: <strong>maximum damage in the first half-second, with
+minimal aim correction.</strong> Note that this is not the same as highest DPS on paper. In a
+pre-aimed hold, first-burst accuracy beats raw damage output, because you are already on target and
+the fight is decided in three or four rounds.</p>
+
+<table>
+<tr><th>Weapon</th><th>Why / when</th></tr>
+<tr><td>M416</td><td>The default, and correctly so. 5.56 with a compensator, vertical or half grip
+and tactical stock puts the first burst exactly where you aimed. Available on every map. If you
+only master one gun, this is it.</td></tr>
+<tr><td>Beryl M762</td><td>The highest close-range damage output available from ground loot. Brutal
+recoil past three or four rounds, so it rewards short bursts at genuinely close distance. Give it to
+your entry fragger, not to everyone.</td></tr>
+<tr><td>AKM</td><td>Highest damage per bullet of the common ground ARs. Slower fire rate and heavy
+vertical kick. Strong in a doorway hold where you get one clean burst.</td></tr>
+<tr><td>UMP45</td><td>The balanced SMG. Controllable, forgiving, good inside buildings. A reasonable
+secondary for a support player in urban zones.</td></tr>
+<tr><td>Vector</td><td>Extreme close-range output, but needs the extended magazine to be usable and
+falls off hard past roughly 25 m. Specialist pick.</td></tr>
+<tr><td>Groza</td><td>Best close-range AR in the game when it drops. Airdrop only, so it is a bonus,
+never a plan.</td></tr>
+<tr><td>JS9</td><td>Rondo-exclusive 9 mm SMG with low recoil and a full-auto mode. Genuinely useful
+inside Jadena City; irrelevant elsewhere.</td></tr>
+<tr><td>Shotguns</td><td>Situational. One player holding one stairwell or one doorway, nothing
+wider. Not a squad answer to rushing.</td></tr>
+</table>
+
+<h3>Mid range (30–150 m)</h3>
+
+<table>
+<tr><th>Weapon</th><th>Why / when</th></tr>
+<tr><td>M416</td><td>Compensator, angled or vertical grip, tactical stock, 3× or 4×. The
+competitive standard across all three maps.</td></tr>
+<tr><td>SCAR-L</td><td>Lower recoil, slightly slower to kill. A good substitute for a player still
+building recoil control.</td></tr>
+<tr><td>Beryl M762 / AKM</td><td>Viable in single or burst fire if the player has the control for
+it. Higher ceiling, lower floor.</td></tr>
+<tr><td>Mini14</td><td>The flattest, most forgiving DMR. Best choice for a player who needs to land
+consistent chip damage during rotations and hold long angles.</td></tr>
+<tr><td>SLR</td><td>Hits considerably harder than the Mini14 with more kick. Better when you expect
+to break armour rather than pressure.</td></tr>
+<tr><td>Kar98k / M24</td><td>Bolt-actions. Genuinely matter on Miramar and on Rondo's north-east
+ridges; much less so on Erangel, where fights are closer.</td></tr>
+</table>
+
+<h3>Role loadouts for a four-player squad</h3>
+
+<table>
+<tr><th>Role</th><th>Loadout</th><th>Job in a rush</th></tr>
+<tr><td>IGL</td><td>M416 + Mini14</td><td>Calls the hold, never takes the first duel. Stays alive to
+keep the squad coordinated.</td></tr>
+<tr><td>Entry fragger</td><td>M762 or M416 close build + SMG</td><td>Takes the first contact and
+the doorway duels.</td></tr>
+<tr><td>Support</td><td>M416 + full utility load</td><td>Throws first, revives, holds the second
+crossfire angle.</td></tr>
+<tr><td>Sniper</td><td>Kar98k/M24 + M416</td><td>Holds the long approach. <strong>Drops to the AR
+the moment the fight is inside 50 m</strong> — a bolt-action in a compound is a liability.</td></tr>
+</table>
+
+<div class="rulebox">
+  <b>Utility floor.</b> Every player carries at minimum two smokes, two frags and one molotov.
+  A squad that runs out of throwables loses compound fights it should win, regardless of aim.
+</div>
+
+<h4>Measure the meta yourself instead of trusting a list</h4>
+<p>You already have the habit from the zone work — do the same here. In Training Grounds, record
+your screen and measure time-to-kill against a target dummy at fixed distances for the three or four
+guns you actually consider. Ten trials each, take the median. Do it again after every balance patch.
+That is half an hour of work and it gives you numbers for <em>your</em> device, <em>your</em>
+sensitivity and <em>your</em> recoil control, which is the only version of the meta that affects
+your results.</p>
+
+<h2 id="clutch"><span class="num">4</span>The 1v4 clutch</h2>
+
+<div class="rulebox">
+  <b>You cannot win a 1v4. You can win four 1v1s.</b> Every rule below is a way of converting the
+  first situation into the second.
+</div>
+
+<h3>The clutch loop</h3>
+<p>Assess → reposition to a one-way hold → go silent → wait for the commit → take the duel →
+reposition → punish the revive → repeat.</p>
+
+<h3>The rules, in priority order</h3>
+
+<ol>
+  <li><strong>Read the situation before you move.</strong> Are they full HP? In zone or out? Did
+  they just win a fight and burn utility? A 1v4 against four players caught outside the zone is
+  barely a fight at all — it is a waiting game you are already winning.</li>
+
+  <li><strong>Get to a position with one approach.</strong> A single-entrance room, a rock with your
+  back to a cliff, a stairwell. What you want is a place where their numbers cannot be applied
+  simultaneously.</li>
+
+  <li><strong>Silence. This is the one people break.</strong> Stop moving entirely. They have to
+  come and find you, and every step they take is information for you and none for them. Most 1v4
+  losses are a solo player repositioning at the wrong moment and getting heard.</li>
+
+  <li><strong>Let them commit.</strong> A squad hunting one player almost always pushes staggered —
+  one impatient player first, or a 2+2. Wait for the first man past his cover, then take him.</li>
+
+  <li><strong>Reposition after every single engagement.</strong> The remaining three now know your
+  window. Change it before they arrive.</li>
+
+  <li><strong>Punish revives, never chase knocks.</strong> Same rule as team play, worth even more
+  here: a knock creates a stationary reviver and takes a second player out of the fight. Hold the
+  angle on the body and you convert one knock into two.</li>
+
+  <li><strong>Use the zone as your fourth teammate.</strong> If you are in zone and they are not, do
+  nothing at all. Hold and let the blue do the work.</li>
+
+  <li><strong>Smoke is for crossing and breaking, not for pushing.</strong> Use it to cross open
+  ground or kill a sniper's angle. Throwing smoke to rush into is how solo players die.</li>
+
+  <li><strong>Heal only after you have broken line of sight <em>and</em> moved.</strong> Not
+  between trades, not behind the same rock they last saw you at.</li>
+
+  <li><strong>Third parties are your ally.</strong> In a tournament lobby, a nearby fourth team is
+  free pressure. Position so that they contact the enemy squad, not you.</li>
+</ol>
+
+<h3>When to invert and play aggressive</h3>
+<p>Holding is the default, not a law. Go aggressive when:</p>
+<ul>
+  <li>The zone is about to force you out anyway — then move first, on your terms, before it is
+  urgent.</li>
+  <li>They have already located you and are setting up a coordinated push with utility. Holding a
+  known position against prepared grenades is worse than flanking wide.</li>
+  <li>You are low enough that a passive hold just delays the loss. Take the wide flank and hit them
+  while they are all looking at your last known position.</li>
+</ul>
+
+<h2 id="maps"><span class="num">5</span>Map analysis</h2>
+
+<h3 class="map-head">Erangel <span class="size">8 × 8 km — three of six matches</span></h3>
+
+<p><strong>Character.</strong> The control map. Compounds sit roughly 200–400 m apart with usable
+cover between them, so fights happen at mid range and positioning beats raw aim. It is the most
+balanced map in the pool and the one where a disciplined team's advantage compounds most reliably.</p>
+
+<p><strong>Ground that matters.</strong> The Pochinki–School–Rozhok triangle is the centre of the
+map and the most valuable real estate in most matches. Georgopol gives you the container yard and
+apartments in the north. Mylta, Mylta Power and Novorepnoye anchor the east. Military Base on the
+south island holds excellent loot behind a bad commitment — the bridges are killing grounds and you
+need an early zone in the south to justify it at all.</p>
+
+<p><strong>Anti-rush here.</strong> Pochinki-style two-storey houses have two ground entrances plus
+a staircase, which is one entrance too many to hold alone. Never solo a house. Take two adjacent
+houses and cross their doorways. The real defensive terrain on Erangel is not the buildings at all —
+it is the stone walls, treelines and ridges <em>between</em> compounds, which give you cover with
+sightlines and no doors for anyone to breach.</p>
+
+<p><strong>Georgopol containers</strong> deserve their own note: sound is unreliable in the stacks,
+vertical angles dominate, and the correct hold is the top of a stack with a teammate watching the
+climb.</p>
+
+<p><strong>Rotations.</strong> Roads are fast and exposed. The treeline and ridge routes between
+Pochinki and School cost you fifteen seconds and save you from every sniper on the map.</p>
+
+<p><strong>Loadout.</strong> M416 plus Mini14 or SLR as the baseline. An AKM or M762 on the entry
+player for Pochinki-density fights. Bolt-actions are less valuable here than on the other two maps.</p>
+
+<h3 class="map-head">Miramar <span class="size">8 × 8 km — two of six matches</span></h3>
+
+<p><strong>Character.</strong> Long sightlines, sparse cover, and total dominance by high ground.
+The critical mental shift: <strong>on Miramar you fight for terrain, not for buildings.</strong> A
+hill with rocks on it is a better position than most compounds, because it gives you elevation,
+cover and sightlines without giving the enemy a door.</p>
+
+<p><strong>Ground that matters.</strong> Pecado sits centre with its boxing gym and casino. Hacienda
+del Patrón is the strongest single elevated compound on the map. Los Leones in the south-east is the
+largest urban area; San Martín, El Pozo, Chumacera, Impala and Campo Militar fill out the rest.</p>
+
+<p><strong>Anti-rush here.</strong> Rushes arrive by vehicle, because crossing open ground on foot
+against a set squad does not work. Run the split from category F without exception: two on the
+driver and engine, two pre-aimed on the dismount side, molotov the dismount point if you have it.</p>
+
+<div class="rulebox">
+  <b>High ground rule.</b> Take the hill that has a back exit. A hill with no retreat is a trap the
+  moment the zone pulls away from you, and Miramar zones move further than they look.
+</div>
+
+<p><strong>Rotations.</strong> Vehicles are not optional. Keep at least one alive into the late
+circles and watch fuel — a dead vehicle in a late Miramar zone is a lost match. Route through
+valleys and behind ridges rather than along the open roads.</p>
+
+<p><strong>Loadout.</strong> This is the map where snipers genuinely earn their slot. M416 plus a
+Kar98k or M24, or plus an SLR if you prefer sustained pressure to burst. Smoke is worth more here
+than on any other map: it is the only cover that exists in the places you need to cross. Close-range
+weapons matter only inside Pecado, Los Leones and San Martín.</p>
+
+<h3 class="map-head">Rondo <span class="size">8 × 8 km — one of six matches</span></h3>
+
+<p><strong>Character.</strong> The largest playable landmass in the game and the most varied. The
+south-west is lakes and bamboo groves — dense, close-quarters, jungle-like. The north-east is ridges
+— open, elevated, Miramar-like. Jadena City in the south-east is vertical urban warfare. One map
+containing three different games.</p>
+
+<p><strong>Ground that matters.</strong> The major points are Jadena City, NEOX Factory, the Stadium
+and Test Track, Mey Ran, Yu Lin and Rin Jiang. Smaller but relevant: Tin Long Garden, Jao Tin,
+Hung Shan, Dan Ching, Nan Chuan, Hemay Town, Fong Tun, Long Ho, Mu Ho Pan, Bei Li and Rai An.</p>
+
+<p><strong>Two planes.</strong> Rondo runs two starting aircraft, which makes drop contests much
+less predictable than on the other maps. Scout both flight paths before committing — the compound
+you thought was uncontested may be directly under the second plane.</p>
+
+<div class="rulebox">
+  <b>Destructible bamboo is the map's defining tactical feature.</b> Bamboo <em>looks</em> like
+  cover and is not — a frag or a vehicle clears it. Two consequences: never trust it defensively,
+  and pre-clear it offensively to open a fire lane into a compound before you commit.
+</div>
+
+<p><strong>Anti-rush here.</strong> It depends entirely on which of the three terrain types your
+zone lands in, which is why Rondo punishes rigid teams. In Jadena, the escalators are both an
+ambush route and a loud one — hold the upper floor with a second player watching the escalator and
+the stairwell separately. In the south-west bamboo, treat it like a close-range map: tight crossfires,
+molotovs on approach lanes, and no reliance on vegetation for cover. On the north-east ridges, apply
+the Miramar playbook wholesale.</p>
+
+<p><strong>Loadout.</strong> The most flexible of the three maps by necessity. M416 plus a DMR as
+the base, then adapt: add a close-range option if the zone pulls toward Jadena or the bamboo, add a
+bolt-action if it pulls toward the ridges. The JS9 is a real option inside Jadena and nowhere else.</p>
+
+<h3 class="map-head">Maps outside the 2026 pool</h3>
+<p>Worth knowing, not worth scrimming, unless your specific regional format includes them.</p>
+<table>
+<tr><td>Sanhok</td><td>4 × 4 km. Very fast, dense jungle, constant contact. Rewards close-range
+weapons and aggression. Out of tier-1 rotation.</td></tr>
+<tr><td>Vikendi</td><td>6 × 6 km. Snow leaves footprints — a genuine information layer no other map
+has. Vehicles handle badly. Out of tier-1 rotation.</td></tr>
+<tr><td>Livik, Karakin, Nusa</td><td>Small maps built for fast queue times. Not part of serious
+competitive preparation.</td></tr>
+</table>
+
+<h2 id="drills"><span class="num">6</span>Drills</h2>
+
+<table>
+<tr><th>Drill</th><th>How</th><th>Trains</th></tr>
+<tr><td>Pre-aim</td><td>TDM, hold one fixed angle for a whole round, never scan. Score yourself on
+duels won on that angle only.</td><td>Category D</td></tr>
+<tr><td>Crossfire</td><td>Custom room, 2v2 in a single compound. Attackers must breach; defenders
+must hold two structures.</td><td>Category A</td></tr>
+<tr><td>Utility</td><td>Training Grounds. Land ten molotovs in a doorway from ten different
+positions. Then ten smokes to cover a fixed 40 m crossing.</td><td>Category C</td></tr>
+<tr><td>Vehicle counter</td><td>Custom room. One squad rushes by car, one defends with the F split.
+Rotate roles.</td><td>Category F</td></tr>
+<tr><td>1v4</td><td>Custom room, four teammates push one player in a fixed compound. Solo player
+must survive 90 seconds, not win.</td><td>Section 4</td></tr>
+<tr><td>TTK measurement</td><td>Training Grounds, record screen, ten trials per gun at fixed
+distances, take the median. Repeat after every patch.</td><td>Section 3</td></tr>
+</table>
+
+<footer>
+Map pool and 2026 structure confirmed against PMGO Season 1 and PMWC 2026 rotations. Weapon
+guidance is built on patch-stable properties rather than current balance figures, which could not be
+verified against a reliable source — measure your own time-to-kill and re-check after each update.
+Confirm the map pool for your specific event against its official rules pack.
+</footer>
+
+</div>
+<!-- sz:foot -->
+<footer class="sz-foot">
+  <div class="sz-foot-in">
+    <p>Independent analysis toolkit. Not affiliated with, endorsed by, or connected to KRAFTON, Tencent or PUBG Mobile. Zone models test a candidate algorithm from a published patent; weapon figures are community estimates, graded by confidence.</p>
+    <p>© 2026 Janin A Apurba</p>
+  </div>
+</footer>
+<!-- /sz:foot -->
+</body>
+</html>

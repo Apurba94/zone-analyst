@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- sz:head -->
+<meta name="description" content="Methodology, prior evidence and computed design results for modelling the blue zone as a grey box.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<!-- /sz:head -->
+<title>Research report · Zone Analyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.page-head{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:8px}
+.status{margin:14px 0 0}
+.toc{background:var(--paper-2);border:1px solid var(--rule);padding:14px 18px;margin:24px 0 8px}
+.toc h2{font-size:13px;margin:0 0 8px}
+.toc ul{margin:0;padding-left:0;list-style:none;columns:2;column-gap:28px;font-size:14px}
+@media (max-width:640px){.toc ul{columns:1}}
+.toc li{margin-bottom:4px;break-inside:avoid}
+.toc ul ul{display:none}
+.toc a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule)}
+.toc a:hover{border-bottom-color:var(--caution)}
+
+article.report{font-size:15.5px;line-height:1.65}
+article.report h2{margin:46px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--rule);scroll-margin-top:16px}
+article.report h3{margin:28px 0 8px;scroll-margin-top:16px}
+article.report ul,article.report ol{margin:0 0 13px;padding-left:22px}
+article.report li{margin-bottom:6px}
+article.report code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em;
+  background:var(--paper-2);border:1px solid var(--rule);padding:0 4px}
+article.report pre{background:var(--paper-2);border:1px solid var(--rule);padding:12px 14px;
+  overflow-x:auto;font-size:13.5px;line-height:1.5;margin:0 0 14px}
+article.report pre code{background:none;border:0;padding:0;font-size:inherit}
+article.report hr{border:0;border-top:1px solid var(--rule);margin:30px 0}
+article.report table{margin:4px 0 16px;font-size:14px}
+article.report td,article.report th{padding:6px 12px 6px 0}
+article.report blockquote{margin:0 0 14px;padding:4px 0 4px 16px;border-left:3px solid var(--caution)}
+.source-note{margin-top:40px}
+</style>
+</head>
+<body class="sz-page">
+<!-- sz:nav -->
+<nav class="sz-nav" aria-label="Site">
+  <div class="sz-nav-in">
+    <a class="sz-brand" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><circle class="core" cx="12" cy="12" r="3.4"/></svg><span>Zone Analyst</span></a>
+    <ul class="sz-links"><li><a href="simulator.html">Simulator</a></li><li><a href="chart.html">Chart</a></li><li><a href="combat.html">Combat math</a></li><li><a href="playbook.html">Playbook</a></li><li><a href="research.html" aria-current="page">Research</a></li></ul>
+  </div>
+</nav>
+<!-- /sz:nav -->
+
+<main class="wrap narrow">
+  <header class="page-head">
+    <p class="kicker">Research report</p>
+    <h1>Blue-Zone Analytics: Methodology, Prior Evidence, and Design Results</h1>
+  </header>
+  <p class="note status"><b>Status.</b> Instrument built, no match data collected. Every empirical claim below is labelled with what it rests on. Nothing in this document is a measurement of PUBG Mobile&#x27;s live behaviour, because no matches have been annotated yet.</p>
+
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ul>
+<li><a href="#1-executive-summary">1. Executive summary</a></li>
+<li><a href="#2-what-the-prior-evidence-actually-says">2. What the prior evidence actually says</a><ul>
+<li><a href="#21-the-patent-family">2.1 The patent family</a></li>
+<li><a href="#22-the-three-readings-of-step-3">2.2 The three readings of step 3</a></li>
+<li><a href="#23-what-the-patent-does-not-establish">2.3 What the patent does not establish</a></li>
+<li><a href="#24-source-quality-warning">2.4 Source quality warning</a></li>
+</ul>
+</li>
+<li><a href="#3-phase-model">3. Phase model</a></li>
+<li><a href="#4-coordinate-system">4. Coordinate system</a><ul>
+<li><a href="#41-an-exact-consequence-the-guaranteed-safe-disc">4.1 An exact consequence: the guaranteed-safe disc</a></li>
+</ul>
+</li>
+<li><a href="#5-hypothesis-set">5. Hypothesis set</a><ul>
+<li><a href="#51-a-confound-found-by-running-the-battery-against-itself">5.1 A confound found by running the battery against itself</a></li>
+<li><a href="#52-a-second-one-testing-several-things-at-once">5.2 A second one: testing several things at once</a></li>
+</ul>
+</li>
+<li><a href="#6-whitelist-cartography">6. Whitelist cartography</a></li>
+<li><a href="#7-computed-result-how-much-data-is-needed">7. Computed result: how much data is needed</a></li>
+<li><a href="#8-computed-result-the-measurement-precision-ceiling">8. Computed result: the measurement precision ceiling</a></li>
+<li><a href="#9-what-the-system-will-and-will-not-tell-an-analyst">9. What the system will and will not tell an analyst</a></li>
+<li><a href="#10-player-distribution">10. Player distribution</a></li>
+<li><a href="#11-validation-plan">11. Validation plan</a></li>
+<li><a href="#12-limitations">12. Limitations</a></li>
+<li><a href="#13-recommended-sequence">13. Recommended sequence</a></li>
+<li><a href="#14-ethics-and-scope">14. Ethics and scope</a></li>
+<li><a href="#sources">Sources</a></li>
+</ul>
+  </nav>
+
+  <article class="report">
+<hr />
+<h2 id="1-executive-summary">1. Executive summary</h2>
+<p>The brief asks for a black-box reverse-engineering programme. That framing
+should be revised before any data is collected, because the box is not black.</p>
+<p>Tencent — the developer and publisher of PUBG Mobile — holds a published patent
+family describing a safe-region narrowing algorithm in a document that names
+PUBG explicitly. Patents are public documents; reading one is neither reverse
+engineering nor a terms-of-service concern. The patent gives a specific,
+implementable candidate for the exact routine this project set out to infer.</p>
+<p>That changes the shape of the work in three ways.</p>
+<p><strong>The research question sharpens.</strong> Instead of "what distribution generates the
+next circle", the question becomes "does the observed data match <em>this</em>
+distribution", which is a goodness-of-fit problem with an exact null.</p>
+<p><strong>The data requirement collapses.</strong> The computed power analysis in §7 shows
+that the structural questions — is the next circle contained in the previous
+one, are bearing and displacement coupled, are bearings confined to a half
+plane — are settled at <strong>n ≈ 10–30 annotated transitions</strong>. Subtler questions
+about radial bias need 100–200. Nobody needs thousands of matches to start.</p>
+<p><strong>A specific, high-value ambiguity appears.</strong> The patent uses the same symbol
+for the angle draw and the radius draw. Read literally, bearing and
+displacement are deterministically coupled and the next centre lies on a
+one-dimensional spiral — which would make the zone far more predictable than
+anyone believes. It is very probably a drafting artefact. It is also falsifiable
+with about ten observations, at power 1.00. Test it first.</p>
+<p>Separately, §4.1 records an exact result that needs no data whatsoever: whenever
+the shrink ratio exceeds 0.5, a disc of radius <code>2r_{t+1} − r_t</code> around the
+current centre cannot be caught outside the next zone, and below 0.5 that
+guarantee disappears entirely. Locating the phase where the schedule crosses 0.5
+is the cheapest actionable output in this whole document.</p>
+<p>The most important negative result is in §8: at broadcast video resolution,
+measurement error in the key statistic grows from ±0.012 at phase 1 to ±0.79 at
+phase 8. <strong>The late circles that matter most tactically are the ones that cannot
+be measured from VODs.</strong> Any study that pools all phases will be dominated by
+noise from exactly the phases it most wants to understand.</p>
+<hr />
+<span id="evidence"></span><h2 id="2-what-the-prior-evidence-actually-says">2. What the prior evidence actually says</h2>
+<h3 id="21-the-patent-family">2.1 The patent family</h3>
+<p>US 11,529,559 B2, assigned to Tencent Technology (Shenzhen), inventor Xin Sun,
+from Chinese priority application CN 201811369245.6 (filed 16 Nov 2018), with
+continuations US 12,017,144 B2 and US 12,515,133 B2. The description defines
+PUBG by name and describes, for a large-map shooter, the following:</p>
+<ol>
+<li>Zone radii per phase are <strong>fixed constants</strong>, decreasing in order, and
+   circle <em>N</em> is contained within circle <em>N−1</em>. Choosing the next zone therefore
+   reduces entirely to choosing a centre.</li>
+<li>The admissible centre region is the disc of radius <code>R = r_prev − r_next</code>,
+   concentric with the current circle.</li>
+<li>A random number <code>r ∈ [0,1]</code> is drawn. An angle of <code>r·360</code> (the text adds "or
+   <code>r·π</code>") is selected, and a radial offset of <code>√r · R</code>.</li>
+<li>The candidate centre is checked against a <strong>whitelist</strong> of pre-authored map
+   regions that exclude terrain unsuitable for combat — the text names sea,
+   mountains and cliffs. A candidate outside the whitelist is redrawn, capped at
+   about 100 iterations.</li>
+<li>A distribution map from tens of thousands of internal trials shows: zero
+   probability in a border region, low probability in an edge transition band,
+   and <strong>equal probability between the map's central and peripheral regions</strong>.</li>
+</ol>
+<p>Point 5 is worth dwelling on. It is a direct statement that there is no radial
+pull toward the map centre — a belief widespread in player communities. It also
+means the observable non-uniformity, if any, comes from the whitelist and the
+containment geometry, not from a centre-seeking term.</p>
+<h3 id="22-the-three-readings-of-step-3">2.2 The three readings of step 3</h3>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Reading</th>
+<th>Angle</th>
+<th>Radius</th>
+<th>Implication for <code>s = (d/R)²</code> and bearing <code>θ</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A — independent draws</td>
+<td><code>θ ~ U(0, 2π)</code></td>
+<td><code>d = R√u</code>, <code>u ~ U(0,1)</code></td>
+<td><code>s ~ U(0,1)</code>, <code>θ ~ U(0,2π)</code>, independent</td>
+</tr>
+<tr>
+<td>B — shared draw, literal</td>
+<td><code>θ = 2πu</code></td>
+<td><code>d = R√u</code>, same <code>u</code></td>
+<td><code>θ = 2πs</code> exactly; centres on a spiral</td>
+</tr>
+<tr>
+<td>C — half span</td>
+<td><code>θ = πu</code></td>
+<td><code>d = R√u</code></td>
+<td>bearings confined to a half plane</td>
+</tr>
+</tbody>
+</table></div>
+<p>Reading A is the textbook way to sample a disc uniformly and is almost certainly
+what is implemented. Readings B and C are cheap to eliminate and expensive to
+have missed.</p>
+<h3 id="23-what-the-patent-does-not-establish">2.3 What the patent does <em>not</em> establish</h3>
+<p>A patent describes an embodiment, not shipped code, and the priority date is
+2018. PUBG Mobile has changed repeatedly since. Publicly documented changes to
+the PC title over the same period include a reduced probability of "extreme"
+zones far from the previous centre after the first phase, a final circle that
+closes to the centre rather than to a random point, and an increasing preference
+for land over water toward the end of a match — all of which are phase-dependent
+departures from the plain patent model. Whether any of them apply to the Mobile
+codebase, which is a separate implementation, is unknown and is precisely what
+the data collection is for.</p>
+<p>Treat the patent as a sharp prior. Do not cite it as a finding.</p>
+<h3 id="24-source-quality-warning">2.4 Source quality warning</h3>
+<p>Searches on this topic return a large volume of SEO content carrying confident,
+mutually contradictory numbers for zone damage and timings, including
+figures that contradict each other within the same site. Several such pages were
+encountered while preparing this document. <strong>No zone timing or damage value has
+been entered into the phase table in §3 from those sources.</strong> The table is
+mostly empty on purpose.</p>
+<hr />
+<h2 id="3-phase-model">3. Phase model</h2>
+<p>The brief asks for a phase-by-phase table and instructs that values must not be
+invented. Accordingly:</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Prev radius</th>
+<th>New radius</th>
+<th>Shrink time</th>
+<th>Wait time</th>
+<th>Centre movement</th>
+<th>Damage</th>
+<th>Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>≤ <code>r₁ − r₂</code></td>
+<td>—</td>
+<td>not measured</td>
+</tr>
+<tr>
+<td>2</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>≤ <code>r₂ − r₃</code></td>
+<td>—</td>
+<td>not measured</td>
+</tr>
+<tr>
+<td>3–9</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>≤ <code>rₜ − rₜ₊₁</code></td>
+<td>—</td>
+<td>not measured</td>
+</tr>
+</tbody>
+</table></div>
+<p>The only entries that can be filled without measurement are the maximum centre
+displacements, which follow from the containment constraint and are exact <em>if</em>
+containment holds — itself the first thing to test.</p>
+<p>Radii are constants per phase and per map, so this table is cheap to complete
+properly: <code>RadiusSchedule.from_observations()</code> recovers the whole schedule from
+a handful of annotated matches, and the result is reusable indefinitely. Timings
+and damage are best measured directly in custom rooms rather than scraped.</p>
+<p>Everything downstream — every probability the dashboard reports — is a function
+of this table. Until it is filled with measured values, the placeholder shrink
+ratio propagates into every number the system produces. This is the single
+highest-leverage piece of data collection in the project.</p>
+<hr />
+<h2 id="4-coordinate-system">4. Coordinate system</h2>
+<p>Normalised map frame: <code>x, y ∈ [0,1]</code> with the origin at the north-west corner,
+<code>r</code> as a fraction of map edge length. Maps of different physical sizes then share
+a frame, which is what makes cross-map comparison meaningful.</p>
+<p>Each transition reduces to two scalars:</p>
+<pre><code>R  = r_t − r_{t+1}                  admissible displacement bound
+d  = |c_{t+1} − c_t|                observed displacement
+s  = (d / R)²                       normalised squared displacement
+θ  = atan2(Δy, Δx) mod 2π           bearing
+</code></pre>
+<p>The squaring is what makes <code>s</code> uniform under Reading A: it is the area-measure
+transform for a uniform disc. Comparing raw displacement <code>d</code> across phases —
+which is what most community analyses do — mixes the radius schedule into the
+statistic and destroys the comparison.</p>
+<span id="guaranteed-safe"></span><h3 id="41-an-exact-consequence-the-guaranteed-safe-disc">4.1 An exact consequence: the guaranteed-safe disc</h3>
+<p>One useful result falls out of the containment constraint alone, with no
+distributional assumption and no data at all.</p>
+<p>The next centre can move at most <code>R = r_t − r_{t+1}</code> from the current one. So a
+point at distance <code>ρ</code> from the current centre is inside the next circle for
+<em>every</em> admissible draw when</p>
+<pre><code>ρ + (r_t − r_{t+1}) ≤ r_{t+1}      ⟺      ρ ≤ 2·r_{t+1} − r_t
+</code></pre>
+<p>Two things follow.</p>
+<p><strong>Above a shrink ratio of 0.5, there is a disc of ground that cannot be caught
+outside.</strong> Its radius is <code>2r_{t+1} − r_t</code>, and the current circle's centre is
+always inside it. Dead centre is not merely a good bet at those ratios; it is
+risk-free with respect to the zone.</p>
+<p><strong>Below 0.5 the guarantee vanishes completely.</strong> The circle can shrink past its
+own centre, and no ground is safe. The phase at which the schedule crosses 0.5
+is therefore the phase at which centre play stops being free — and locating that
+crossover is a pure measurement of the radius schedule, needing no zone
+observations at all beyond the radii themselves.</p>
+<p>Because total centre drift telescopes, the same formula extends to a <code>k</code>-phase
+horizon by substituting <code>r_{t+k}</code>. The disc shrinks quickly with <code>k</code>, which is
+the exact sense in which a long-horizon guarantee is unavailable.</p>
+<p>This is implemented as <code>geometry.guaranteed_safe_radius</code> and verified in the
+test suite by checking that no point of the disc ever falls outside 20,000
+sampled circles. It is drawn as the dotted inner ring on the interactive chart.</p>
+<hr />
+<h2 id="5-hypothesis-set">5. Hypothesis set</h2>
+<p>The brief's hypotheses A–H map onto this frame as follows.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Brief</th>
+<th>Restated as a testable claim</th>
+<th>Test</th>
+<th>Implemented as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A uniform random</td>
+<td>containment fails; <code>d &gt; R</code> occurs</td>
+<td><code>containment_test</code></td>
+<td><code>UniformMapModel</code></td>
+</tr>
+<tr>
+<td>B previous-circle constrained</td>
+<td><code>s ~ U(0,1)</code>, <code>θ ~ U(0,2π)</code>, independent</td>
+<td><code>radial_uniformity_test</code></td>
+<td><code>AdmissibleDiscModel</code></td>
+</tr>
+<tr>
+<td>C weighted random</td>
+<td><code>s ~ Beta(a,b)</code>, <code>a,b ≠ 1</code></td>
+<td><code>radial_uniformity_test</code></td>
+<td><code>EdgeBiasedDiscModel</code></td>
+</tr>
+<tr>
+<td>D terrain-aware</td>
+<td>centres avoid excluded terrain beyond disc geometry</td>
+<td><code>terrain_association_test</code></td>
+<td><code>WhitelistRejection</code></td>
+</tr>
+<tr>
+<td>E water-aware</td>
+<td>special case of D</td>
+<td><code>terrain_association_test</code></td>
+<td>mask parameter</td>
+</tr>
+<tr>
+<td>F map-geometry-aware</td>
+<td>edge band with zero density</td>
+<td>whitelist estimation</td>
+<td><code>coast_band_mask</code></td>
+</tr>
+<tr>
+<td>G phase-dependent</td>
+<td><code>s</code> distribution differs by phase</td>
+<td><code>phase_homogeneity_test</code></td>
+<td>per-phase fitting</td>
+</tr>
+<tr>
+<td>H hybrid</td>
+<td>B ∧ D ∧ G</td>
+<td>full battery</td>
+<td>composed models</td>
+</tr>
+<tr>
+<td>— (new) patent literal</td>
+<td><code>θ = 2πs</code> exactly</td>
+<td><code>coupling_test</code></td>
+<td><code>CoupledSpiralModel</code></td>
+</tr>
+<tr>
+<td>— (new) half span</td>
+<td><code>θ</code> confined to a half plane</td>
+<td><code>bearing_kuiper_test</code></td>
+<td><code>angle_span = π</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Hypothesis D deserves a note on how it is tested, because the usual version of
+this test is wrong. Asking "do zone centres land on land more often than water?"
+compares against the wrong baseline — the admissible disc may barely contain any
+water in the first place. <code>terrain_association_test</code> compares the observed rate
+against the <em>disc-restricted</em> expected rate, transition by transition, using a
+Poisson-binomial null. That is the difference between measuring the algorithm
+and measuring the map.</p>
+<span id="confound"></span><h3 id="51-a-confound-found-by-running-the-battery-against-itself">5.1 A confound found by running the battery against itself</h3>
+<p>Running the pipeline on synthetic data generated from a known rule caught a
+false-positive mode that would have produced a spectacular wrong answer on real
+data.</p>
+<p>The coupling test asks whether the residual <code>φ = θ − span·s</code> concentrates. Under
+genuine shared-draw coupling <code>φ ≡ 0</code> and the circular resultant is 1. But <em>any</em>
+non-uniform bearing marginal also concentrates <code>φ</code>: with bearings confined to a
+half plane and <code>s</code> drawn independently, <code>θ − π·s</code> is triangular and peaked at
+zero, and Rayleigh reports it as highly significant at a resultant near 0.33.</p>
+<p>So a significant coupling p-value is not evidence of coupling. The resultant has
+to be near 1. <code>verdict()</code> requires ≥ 0.70 for that reason, and the half-plane
+case now falls through to the bearing tests where it belongs.</p>
+<p>The general lesson applies beyond this one test: several tests in the battery
+share the same inputs, and a departure in one marginal leaks into tests aimed at
+something else. Read the whole battery before drawing a conclusion, never one
+line of it.</p>
+<h3 id="52-a-second-one-testing-several-things-at-once">5.2 A second one: testing several things at once</h3>
+<p>Rendering the simulator during packaging surfaced a related problem. For data
+generated by the uniform-disc rule, the verdict reported "departs from uniform"
+in about one batch in ten.</p>
+<p>No single test was at fault. Each marginal test is calibrated on its own — on
+uniform data the radial KS test fired 5.4% of the time and Kuiper 5.0%, against
+a nominal 5%. But the verdict flagged a departure when <em>any</em> of them fired, and
+the chance that at least one of several independent 5% tests fires is well
+above 5%. Measured on uniform data:</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Verdict</th>
+<th>Marginal tests</th>
+<th>False alarms before</th>
+<th>After Bonferroni</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simulator and app</td>
+<td>2</td>
+<td>10.1% (2,000 batches)</td>
+<td>4.8%</td>
+</tr>
+<tr>
+<td>Python battery</td>
+<td>4</td>
+<td>15.7% (300 batches)</td>
+<td>4.0%</td>
+</tr>
+</tbody>
+</table></div>
+<p>The verdict now judges each of the <em>m</em> marginal tests at 0.05 / <em>m</em>, which caps
+its false-alarm rate at 5% whatever the dependence between the tests. The cost
+in power is small: at 25 matches the simulator still identifies every non-uniform
+rule 100% of the time, and the Python verdict still detects a <em>mild</em> pull toward
+the previous centre (Beta(0.7, 1)) in 88.7% of 175-transition batches.</p>
+<p>The power table in §7 is unaffected — it describes each test on its own at 0.05.
+A conclusion drawn from the verdict needs slightly more data than that table
+implies, because the verdict is deliberately stricter than any one test.</p>
+<hr />
+<h2 id="6-whitelist-cartography">6. Whitelist cartography</h2>
+<p>The whitelist is the one component of the model with genuine reconstruction
+value, because it is map-specific authored content rather than a formula.</p>
+<p>Its signature is regions where centres never land despite the geometry
+permitting it. With enough observed centres and their admissible discs, the
+whitelist can be estimated: for each map cell, compare the number of times a
+centre landed there against the number of times a centre <em>could</em> have landed
+there. Cells with high opportunity and zero landings are excluded terrain.</p>
+<p>This is a coverage-limited estimate — cells that rarely fall inside any
+admissible disc will stay unknown for a long time — and the estimate should
+carry per-cell confidence rather than being rendered as a hard boundary. The
+rejection cap noted in §2.1 also means the exclusion is not absolute: when the
+admissible disc barely intersects the whitelist, a small amount of probability
+leaks into excluded terrain. That leak is itself a testable signature.</p>
+<p>Not implemented yet. It needs data first, and its structure depends on what
+§7's tests find.</p>
+<hr />
+<span id="data-needed"></span><h2 id="7-computed-result-how-much-data-is-needed">7. Computed result: how much data is needed</h2>
+<p>Simulated power of the battery at α = 0.05, 400 trials per cell. Data are
+generated from each scenario; the figure is the fraction of trials where the
+test correctly rejects.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Test</th>
+<th>n=10</th>
+<th>n=20</th>
+<th>n=30</th>
+<th>n=50</th>
+<th>n=100</th>
+<th>n=200</th>
+<th>n=400</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>shared-draw spiral (patent literal reading)</td>
+<td>coupling</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>half-plane bearings</td>
+<td>kuiper</td>
+<td>0.97</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>mild pull toward previous centre</td>
+<td>radial</td>
+<td>0.16</td>
+<td>0.24</td>
+<td>0.28</td>
+<td>0.55</td>
+<td>0.81</td>
+<td>0.98</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>strong pull toward previous centre</td>
+<td>radial</td>
+<td>0.54</td>
+<td>0.76</td>
+<td>0.94</td>
+<td>0.99</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>mild pull toward the rim</td>
+<td>radial</td>
+<td>0.15</td>
+<td>0.24</td>
+<td>0.34</td>
+<td>0.47</td>
+<td>0.77</td>
+<td>0.98</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>no previous-circle constraint</td>
+<td>radial</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>true uniform disc (false-positive rate)</td>
+<td>radial</td>
+<td>0.04</td>
+<td>0.05</td>
+<td>0.04</td>
+<td>0.04</td>
+<td>0.04</td>
+<td>0.04</td>
+<td>0.03</td>
+</tr>
+</tbody>
+</table></div>
+<p>The false-positive row confirms the battery is calibrated: 0.03–0.05 against a
+nominal 0.05.</p>
+<p>Reading this as an annotation budget:</p>
+<ul>
+<li><strong>10 transitions</strong> settle containment, coupling, and the half-plane reading.
+  That is roughly two matches. Do this before anything else.</li>
+<li><strong>30 transitions</strong> detect a strong radial bias at 94% power.</li>
+<li><strong>100–200 transitions</strong> are needed for a mild bias, and this is the regime any
+  realistic departure from the patent model probably lives in.</li>
+<li>Beyond 400, the marginal return on more of the <em>same</em> measurement is small.
+  Effort is better spent on phase-stratified sampling and on cross-map coverage.</li>
+</ul>
+<p>Because a mild bias needs ~200 transitions and each match yields at most 8, a
+per-map, per-phase analysis needs on the order of 25–30 matches per map for the
+pooled tests, and considerably more to stratify by phase. Plan for that shape,
+not for "as many as possible".</p>
+<hr />
+<span id="measurement-precision"></span><h2 id="8-computed-result-the-measurement-precision-ceiling">8. Computed result: the measurement precision ceiling</h2>
+<p>The RANSAC + algebraic circle fitter was characterised against rendered circles
+with known ground truth, 150 trials per condition. Errors are fractions of map
+edge length.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Centre error (median)</th>
+<th>Centre p95</th>
+<th>Radius error (median)</th>
+<th>Radius p95</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Full circle</td>
+<td>0.00110</td>
+<td>0.00203</td>
+<td>0.00081</td>
+<td>0.00147</td>
+</tr>
+<tr>
+<td>90° arc</td>
+<td>0.00113</td>
+<td>0.00188</td>
+<td>0.00077</td>
+<td>0.00172</td>
+</tr>
+<tr>
+<td>45° arc</td>
+<td>0.00180</td>
+<td>0.00499</td>
+<td>0.00114</td>
+<td>0.00432</td>
+</tr>
+</tbody>
+</table></div>
+<p>On an 8×8 km map, 0.0011 map units is about 9 metres. The fitter holds up well
+on clipped arcs down to 90°, which matters because minimap views rarely show a
+complete circle.</p>
+<p>Now propagate that into <code>s</code>. Since <code>s = (d/R)²</code> divides by a <em>difference</em> of two
+fitted radii, the error is amplified as the circles get small:</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Phase</th>
+<th><code>R</code></th>
+<th>Relative error in <code>R</code></th>
+<th>Error in <code>s</code> at <code>s = 0.5</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0.2790</td>
+<td>0.4%</td>
+<td>±0.012</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0.1535</td>
+<td>0.7%</td>
+<td>±0.022</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0.0844</td>
+<td>1.4%</td>
+<td>±0.040</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0.0464</td>
+<td>2.5%</td>
+<td>±0.072</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0.0255</td>
+<td>4.5%</td>
+<td>±0.131</td>
+</tr>
+<tr>
+<td>6</td>
+<td>0.0140</td>
+<td>8.1%</td>
+<td>±0.238</td>
+</tr>
+<tr>
+<td>7</td>
+<td>0.0077</td>
+<td>14.8%</td>
+<td>±0.434</td>
+</tr>
+<tr>
+<td>8</td>
+<td>0.0042</td>
+<td>26.9%</td>
+<td>±0.788</td>
+</tr>
+</tbody>
+</table></div>
+<p>(Using the placeholder radius schedule; the qualitative pattern is
+schedule-independent, since <code>R</code> shrinks geometrically whatever the ratios are.)</p>
+<p><code>s</code> lives on [0,1]. By phase 7 the measurement uncertainty covers nearly half
+that range, and by phase 8 it covers the whole of it. <strong>Phases 1–4 carry
+essentially all of the usable signal available from broadcast footage.</strong></p>
+<p>Three consequences:</p>
+<ol>
+<li>Do not pool phases. A pooled test is dominated by noise contributed by the
+   phases with the least information.</li>
+<li>Community claims about late-circle patterns are, at the precision anyone
+   outside the studio actually has, unfalsifiable. Treat them accordingly.</li>
+<li>If late phases must be studied, the measurement method has to change:
+   full-screen map captures at native resolution, custom rooms where the
+   observer controls the camera, or frame-averaging across many frames of a
+   static circle. Not minimap fits from a 1080p stream.</li>
+</ol>
+<hr />
+<h2 id="9-what-the-system-will-and-will-not-tell-an-analyst">9. What the system will and will not tell an analyst</h2>
+<p>The forecast engine produces two distinct fields, and conflating them is the
+most common error in this genre:</p>
+<ul>
+<li><strong>Centre density</strong> — where the next circle's centre will be. This is what
+  every community heatmap shows.</li>
+<li><strong>Survival field</strong> — the probability that a team standing at a point is still
+  inside the zone. This is what positioning decisions actually depend on.</li>
+</ul>
+<p>They differ substantially. A point well off-centre can have high survival
+probability because it falls inside many sampled circles, while a point at the
+mode of the centre density gains little if the circle is large. The strategy
+layer scores positions on the survival field, penalised by rotation cost from a
+Dijkstra pass over a traversability grid, and by a contention term that reflects
+the obvious fact that every other team is looking at the same map.</p>
+<p>Multi-phase lookahead compounds uncertainty at the rate the game does. The
+three-step field is close to flat, which is the correct answer, and the system
+reports it as such rather than manufacturing a confident-looking mode.</p>
+<p>The honest form of an output is: <em>"Region A holds an estimated 34% of the
+next-centre probability mass and covers 9% of the map; region B holds 21% over
+6%."</em> An estimate that spreads 90% of the mass over 60% of the map is not a
+prediction, and <code>highest_density_regions</code> reports region area alongside every
+probability so that this cannot be hidden.</p>
+<hr />
+<h2 id="10-player-distribution">10. Player distribution</h2>
+<p>The brief asks whether player positions influence future zones. Two things must
+be separated.</p>
+<p><strong>Zone centre selection.</strong> The patent's routine takes no player-position input.
+If the shipped implementation matches, player distribution cannot influence
+where the circle goes, and any apparent correlation is either coincidence,
+selection effect, or reverse causation — players rotate toward where they
+<em>expect</em> the zone, so surviving players cluster near zone centres by their own
+choice. This confound is severe and is the reason essentially every community
+claim on this topic is uninterpretable.</p>
+<p><strong>Zone timing and damage.</strong> Separately, the PC title has documented "dynamic
+blue zone" behaviour keyed to survivor count on some maps. That is a real
+player-count dependency, but it acts on timing and damage, not on location.</p>
+<p>Conflating the two produces the widespread belief that "the circle follows
+players". Test them as separate claims with separate data.</p>
+<p>The only clean test of the location claim available without studio access is a
+custom room with players deliberately clustered in a known region, repeated
+enough times to compare the centre distribution against the disc-uniform null.
+That is feasible and cheap, and it is the recommended way to settle this.</p>
+<hr />
+<h2 id="11-validation-plan">11. Validation plan</h2>
+<p>Split by match, never by transition — transitions within a match share a first
+circle and a radius schedule, so a random split leaks. <code>schema.match_level_split</code>
+enforces this.</p>
+<p>Because the model is a probability distribution rather than a point predictor,
+evaluate it as one:</p>
+<ul>
+<li><strong>Log score</strong> of the observed centre under the predicted density, against the
+  disc-uniform baseline. Positive mean improvement is the only meaningful sense
+  in which the model "beats chance".</li>
+<li><strong>PIT calibration</strong> on <code>s</code>: transform each observed value through the
+  predicted CDF and test the result for uniformity. A model can rank well and
+  still be badly calibrated, and calibration is what makes a stated 34% mean 34%.</li>
+<li><strong>Coverage</strong> of the stated 50/75/90/95% regions on held-out matches, reported
+  with region area.</li>
+<li><strong>Cross-map and cross-tournament</strong> held-out sets, since whitelist geometry is
+  map-specific by construction and patch-specific in practice.</li>
+</ul>
+<p>A model that improves the log score on training matches but not on unseen ones
+has fitted the annotation, not the algorithm.</p>
+<hr />
+<h2 id="12-limitations">12. Limitations</h2>
+<ul>
+<li>No match data has been collected. Nothing here is a measurement of live
+  behaviour.</li>
+<li>The radius schedule is a placeholder and propagates into every probability.</li>
+<li>The whitelist is unknown; the coast-band mask is a crude stand-in, labelled as
+  such in code.</li>
+<li>Late-phase measurement is precision-limited as quantified in §8.</li>
+<li>The patent may not describe shipped code, and may be out of date.</li>
+<li>Esports rooms may use different zone parameters from public matches; this is
+  untested and would invalidate pooling the two.</li>
+<li>The contention term in the strategy layer is a heuristic proxy, not a
+  game-theoretic equilibrium.</li>
+</ul>
+<hr />
+<h2 id="13-recommended-sequence">13. Recommended sequence</h2>
+<ol>
+<li>Fill the radius schedule from ~5 annotated matches per map. Everything else
+   depends on it.</li>
+<li>Annotate 10 transitions. Run containment, coupling, and Kuiper. This is a
+   day's work and eliminates or confirms three hypotheses outright.</li>
+<li>Characterise your own annotation error on your own footage before trusting
+   any tolerance.</li>
+<li>Extend to ~200 transitions on one map, phases 1–4 only, and test for radial
+   and phase structure.</li>
+<li>Only then begin whitelist estimation, and only on the map with the best
+   coverage.</li>
+<li>Custom-room experiments for the player-distribution question and for late
+   phases, where VOD precision runs out.</li>
+</ol>
+<hr />
+<h2 id="14-ethics-and-scope">14. Ethics and scope</h2>
+<p>Everything in this project uses published patent documents, publicly broadcast
+tournament footage, and observations made by playing the game normally. No
+component touches game memory, network traffic, the client binary, or anti-cheat
+systems, and none should be added. If a tournament organiser restricts
+analytical use of their VODs, that restriction governs regardless of what is
+technically possible.</p>
+<hr />
+<h2 id="sources">Sources</h2>
+<ul>
+<li>US 11,529,559 B2, "Method and device for adjusting region, storage medium, and
+  electronic device", Tencent Technology (Shenzhen), inventor Xin Sun; priority
+  CN 201811369245.6, 16 Nov 2018. Continuations US 12,017,144 B2 and
+  US 12,515,133 B2.</li>
+<li>PUBG Corp. patch notes describing blue-zone changes to the PC title (reduced
+  probability of extreme safe zones after the first, final circle closing to the
+  centre, increased land preference late in a match).</li>
+<li>PUBG community wiki, on dynamic blue-zone behaviour keyed to survivor count.</li>
+</ul>
+<p>Power and precision figures in §7 and §8 were computed by <code>bluezone.power</code> and
+<code>bluezone.cv.synthetic_error_report</code> in this repository and are reproducible with
+<code>python -m bluezone.power</code>.</p>
+  </article>
+
+  <p class="small source-note">Generated from <code>research/docs/REPORT.md</code>. The power and
+  precision figures were computed by the code in the repository and reproduce with
+  <code>python -m bluezone.power</code>.</p>
+</main>
+
+<!-- sz:foot -->
+<footer class="sz-foot">
+  <div class="sz-foot-in">
+    <p>Independent analysis toolkit. Not affiliated with, endorsed by, or connected to KRAFTON, Tencent or PUBG Mobile. Zone models test a candidate algorithm from a published patent; weapon figures are community estimates, graded by confidence.</p>
+    <p>© 2026 Janin A Apurba</p>
+  </div>
+</footer>
+<!-- /sz:foot -->
+</body>
+</html>

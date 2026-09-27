@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- sz:head -->
+<meta name="description" content="Where the next circle's centre can land, and where a team can stand and stay inside: centre density versus survival.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<!-- /sz:head -->
+<title>Probability chart · Zone Analyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E9E0CC; --paper-2:#E1D6BE; --ink:#16324A;
+  --ink-soft:#516A7C; --rule:#C3B69A; --caution:#A6205F; --sea:#7FA8C4;
+  --band-1:#DCD2BA; --band-2:#B9CBD6; --band-3:#8FB2C8; --band-4:#5A8BAC; --band-5:#2E5F84;
+  --shadow:rgba(22,50,74,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1A22; --paper-2:#132430; --ink:#CBDDE8; --ink-soft:#8AA3B1;
+    --rule:#263A46; --caution:#E4629A; --sea:#4E7E9E;
+    --band-1:#17262F; --band-2:#1E3B4C; --band-3:#2B586F; --band-4:#3E7C99; --band-5:#67A9C6;
+    --shadow:rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1A22; --paper-2:#132430; --ink:#CBDDE8; --ink-soft:#8AA3B1;
+  --rule:#263A46; --caution:#E4629A; --sea:#4E7E9E;
+  --band-1:#17262F; --band-2:#1E3B4C; --band-3:#2B586F; --band-4:#3E7C99; --band-5:#67A9C6;
+  --shadow:rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 22px 56px}
+
+header{border-bottom:1px solid var(--rule);padding-bottom:18px;margin-bottom:22px}
+h1{
+  font-family:Spectral,Georgia,serif; font-weight:400; font-size:31px;
+  letter-spacing:-.012em; margin:0 0 6px; line-height:1.16;
+}
+.sub{color:var(--ink-soft);max-width:62ch;margin:0;font-size:14.5px}
+
+.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(268px,1fr);gap:26px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+
+/* ---- chart plate ---- */
+.plate{position:relative;background:var(--paper-2);border:1px solid var(--rule);box-shadow:0 1px 0 var(--shadow)}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.plate-foot{
+  display:flex;flex-wrap:wrap;gap:16px;align-items:center;
+  border-top:1px solid var(--rule);padding:9px 12px;font-size:12.5px;color:var(--ink-soft)
+}
+.key{display:flex;align-items:center;gap:6px}
+.chip{width:15px;height:11px;border:1px solid var(--rule)}
+.swatch-line{width:16px;height:0;border-top:2px solid var(--caution)}
+
+/* ---- controls ---- */
+.panel{border:1px solid var(--rule);background:var(--paper-2)}
+.panel + .panel{margin-top:16px}
+.panel h2{
+  font-family:Spectral,Georgia,serif;font-weight:600;font-size:14px;letter-spacing:.01em;
+  margin:0;padding:10px 14px;border-bottom:1px solid var(--rule);
+}
+.panel-body{padding:13px 14px}
+.field{margin-bottom:13px}
+.field:last-child{margin-bottom:0}
+label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px}
+.val{font-family:Spectral,Georgia,serif;font-variant-numeric:tabular-nums;color:var(--ink)}
+select,input[type=range]{width:100%}
+select{
+  font-family:Archivo,sans-serif;font-size:13.5px;padding:6px 8px;color:var(--ink);
+  background:var(--paper);border:1px solid var(--rule);border-radius:0;
+}
+input[type=range]{accent-color:var(--sea);height:22px;background:transparent}
+.seg{display:flex;border:1px solid var(--rule)}
+.seg button{
+  flex:1;font-family:Archivo,sans-serif;font-size:13px;padding:7px 4px;cursor:pointer;
+  background:var(--paper);color:var(--ink-soft);border:0;border-right:1px solid var(--rule);
+}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+button:focus-visible,select:focus-visible,input:focus-visible,canvas:focus-visible{
+  outline:2px solid var(--caution);outline-offset:2px
+}
+
+/* ---- readouts ---- */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:right;padding:5px 0;border-bottom:1px solid var(--rule)}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:500;color:var(--ink-soft);font-size:12px}
+tbody td{font-family:Spectral,Georgia,serif;font-variant-numeric:tabular-nums;font-size:14px}
+tr:last-child td{border-bottom:0}
+.big{font-family:Spectral,Georgia,serif;font-size:29px;line-height:1.1;font-variant-numeric:tabular-nums}
+.pin-note{font-size:12.5px;color:var(--ink-soft);margin:8px 0 0}
+
+.caveat{
+  margin-top:26px;border-top:1px solid var(--rule);padding-top:16px;
+  font-size:13px;color:var(--ink-soft);max-width:78ch
+}
+.caveat strong{color:var(--ink);font-weight:500}
+.busy{opacity:.55;transition:opacity .12s}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<!-- sz:nav -->
+<nav class="sz-nav" aria-label="Site">
+  <div class="sz-nav-in">
+    <a class="sz-brand" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><circle class="core" cx="12" cy="12" r="3.4"/></svg><span>Zone Analyst</span></a>
+    <ul class="sz-links"><li><a href="simulator.html">Simulator</a></li><li><a href="chart.html" aria-current="page">Chart</a></li><li><a href="combat.html">Combat math</a></li><li><a href="playbook.html">Playbook</a></li><li><a href="research.html">Research</a></li></ul>
+  </div>
+</nav>
+<!-- /sz:nav -->
+<div class="wrap">
+
+<header>
+  <h1>Blue-zone probability chart</h1>
+  <p class="sub">Set the current circle, then read where the next one can reach. Contours show
+  where the next centre falls; switch to the survival field to see where a team can stand and
+  stay inside. Both are simulated from a candidate algorithm, not fitted to match data.</p>
+</header>
+
+<div class="layout">
+
+  <div>
+    <div class="plate">
+      <canvas id="plate" width="720" height="720" tabindex="0"
+              aria-label="Map chart. Click to move the current circle, shift-click to drop a position pin."></canvas>
+      <div class="plate-foot">
+        <span class="key"><span class="chip" style="background:var(--band-5)"></span>densest 50%</span>
+        <span class="key"><span class="chip" style="background:var(--band-4)"></span>75%</span>
+        <span class="key"><span class="chip" style="background:var(--band-3)"></span>90%</span>
+        <span class="key"><span class="chip" style="background:var(--band-2)"></span>95%</span>
+        <span class="key"><span class="swatch-line"></span>current circle</span>
+        <span class="key"><span class="swatch-line" style="border-top:1.5px dotted var(--ink)"></span>guaranteed safe</span>
+        <span class="key" style="margin-left:auto">click to move, shift-click to pin</span>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>Current circle</h2>
+      <div class="panel-body">
+        <div class="field">
+          <label for="phase">Phase <span class="val" id="phaseV">3</span></label>
+          <input type="range" id="phase" min="1" max="7" step="1" value="3">
+        </div>
+        <div class="field">
+          <label for="radius">Radius <span class="val" id="radiusV">0.190</span> of map width</label>
+          <input type="range" id="radius" min="0.02" max="0.45" step="0.005" value="0.19">
+        </div>
+        <div class="field">
+          <label for="ratio">Next radius ÷ current <span class="val" id="ratioV">0.55</span>
+            — measure this, don't trust the default</label>
+          <input type="range" id="ratio" min="0.3" max="0.85" step="0.01" value="0.55">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Model</h2>
+      <div class="panel-body">
+        <div class="field">
+          <label for="model">Centre-selection rule</label>
+          <select id="model">
+            <option value="disc">Uniform over admissible disc (patent, reading A)</option>
+            <option value="spiral">Shared draw — angle and radius coupled (reading B)</option>
+            <option value="half">Half-plane bearings (reading C)</option>
+            <option value="free">No containment constraint (null baseline)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="steps">Phases ahead <span class="val" id="stepsV">1</span></label>
+          <input type="range" id="steps" min="1" max="3" step="1" value="1">
+        </div>
+        <div class="field">
+          <label for="coast">Excluded edge band <span class="val" id="coastV">0.00</span>
+            — stand-in for the terrain whitelist</label>
+          <input type="range" id="coast" min="0" max="0.25" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <label>Field shown</label>
+          <div class="seg" role="group">
+            <button id="bDens" aria-pressed="true">Centre density</button>
+            <button id="bSurv" aria-pressed="false">Survival</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>How concentrated is it?</h2>
+      <div class="panel-body">
+        <table>
+          <thead><tr><th>Mass</th><th>Map area</th><th>Concentration</th></tr></thead>
+          <tbody id="hdr"></tbody>
+        </table>
+        <p class="pin-note" id="hdrNote"></p>
+        <p class="pin-note" id="safeNote" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--rule)"></p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Pinned position</h2>
+      <div class="panel-body">
+        <div class="big" id="pinP">—</div>
+        <p class="pin-note" id="pinNote">Shift-click the chart to test a compound or ridge.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="caveat">
+  <strong>What this is.</strong> A forward simulation of a published candidate algorithm — the
+  centre-selection routine described in Tencent's region-adjustment patent family — not a model
+  fitted to observed matches. The radius ratio is a placeholder and propagates into every number
+  here; measure it from your own annotated matches before quoting any of these figures.
+  The excluded-edge band is a crude stand-in for the real terrain whitelist, whose shape is
+  map-specific and unknown. Region area is shown next to every probability on purpose: 90% of the
+  mass spread across 60% of the map is not a prediction.
+</p>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+const GRID = 132, NS = 9000;
+const cv = document.getElementById("plate"), ctx = cv.getContext("2d");
+const off = document.createElement("canvas"); off.width = off.height = GRID;
+const octx = off.getContext("2d");
+const LEVELS = [0.5,0.75,0.9,0.95];
+
+const S = { x:0.46, y:0.54, phase:3, r:0.19, ratio:0.55, steps:1,
+            model:"disc", coast:0, field:"dens", pin:null };
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function rgb(h){ h=h.replace("#",""); if(h.length===3) h=h.split("").map(c=>c+c).join("");
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
+
+// ---- sampling -------------------------------------------------------------
+function radii(){
+  const out=[]; let r=S.r;
+  for(let k=0;k<S.steps;k++){ r=r*S.ratio; out.push(r); }
+  return out;
+}
+function offset(R, model){
+  let u=Math.random(), th, d;
+  if(model==="spiral"){ th=2*Math.PI*u; d=R*Math.sqrt(u); }
+  else if(model==="half"){ th=Math.PI*Math.random(); d=R*Math.sqrt(u); }
+  else { th=2*Math.PI*Math.random(); d=R*Math.sqrt(u); }
+  return [d*Math.cos(th), d*Math.sin(th)];
+}
+function inBand(x,y){ const m=S.coast; return x>=m&&x<=1-m&&y>=m&&y<=1-m; }
+
+function simulate(){
+  const rs = radii(), paths = new Float32Array(NS*S.steps*2);
+  for(let i=0;i<NS;i++){
+    let cx=S.x, cy=S.y, cr=S.r;
+    for(let k=0;k<S.steps;k++){
+      const nr=rs[k]; let nx,ny;
+      if(S.model==="free"){
+        const lo=nr, hi=1-nr;
+        nx = hi>lo ? lo+Math.random()*(hi-lo) : 0.5;
+        ny = hi>lo ? lo+Math.random()*(hi-lo) : 0.5;
+      } else {
+        const R=Math.max(cr-nr,0);
+        let ok=false;
+        for(let t=0;t<100;t++){
+          const o=offset(R,S.model); nx=cx+o[0]; ny=cy+o[1];
+          if(S.coast===0 || inBand(nx,ny)){ ok=true; break; }
+        }
+        if(!ok){ /* patent caps the retry loop; keep the last draw */ }
+      }
+      const b=(i*S.steps+k)*2; paths[b]=nx; paths[b+1]=ny;
+      cx=nx; cy=ny; cr=nr;
+    }
+  }
+  return {paths, rs};
+}
+
+function densityField(sim){
+  const f=new Float32Array(GRID*GRID), k=S.steps-1;
+  for(let i=0;i<NS;i++){
+    const b=(i*S.steps+k)*2;
+    const gx=Math.floor(sim.paths[b]*GRID), gy=Math.floor(sim.paths[b+1]*GRID);
+    if(gx>=0&&gx<GRID&&gy>=0&&gy<GRID) f[gy*GRID+gx]++;
+  }
+  // light 3x3 smoothing so contours read as contours, not as histogram noise
+  const g=new Float32Array(GRID*GRID);
+  for(let y=0;y<GRID;y++) for(let x=0;x<GRID;x++){
+    let s=0,n=0;
+    for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
+      const yy=y+dy,xx=x+dx;
+      if(yy>=0&&yy<GRID&&xx>=0&&xx<GRID){ s+=f[yy*GRID+xx]; n++; }
+    }
+    g[y*GRID+x]=s/n;
+  }
+  let tot=0; for(let i=0;i<g.length;i++) tot+=g[i];
+  if(tot>0) for(let i=0;i<g.length;i++) g[i]/=tot;
+  return g;
+}
+
+// survival: stamp each sampled disc into a difference array, then prefix-sum
+function survivalField(sim){
+  const k=S.steps-1, r=sim.rs[k]*GRID;
+  const diff=new Int32Array(GRID*(GRID+1));
+  for(let i=0;i<NS;i++){
+    const b=(i*S.steps+k)*2;
+    const cx=sim.paths[b]*GRID, cy=sim.paths[b+1]*GRID;
+    const y0=Math.max(Math.ceil(cy-r),0), y1=Math.min(Math.floor(cy+r),GRID-1);
+    for(let y=y0;y<=y1;y++){
+      const dy=(y+0.5)-cy, h=Math.sqrt(Math.max(r*r-dy*dy,0));
+      const xs=Math.max(Math.ceil(cx-h),0), xe=Math.min(Math.floor(cx+h)+1,GRID);
+      if(xe>xs){ diff[y*(GRID+1)+xs]++; diff[y*(GRID+1)+xe]--; }
+    }
+  }
+  const f=new Float32Array(GRID*GRID);
+  for(let y=0;y<GRID;y++){ let run=0;
+    for(let x=0;x<GRID;x++){ run+=diff[y*(GRID+1)+x]; f[y*GRID+x]=run/NS; } }
+  return f;
+}
+
+function hdr(field){
+  const v=Array.from(field).sort((a,b)=>b-a);
+  let cum=0, out=[], li=0;
+  for(let i=0;i<v.length && li<LEVELS.length;i++){
+    cum+=v[i];
+    while(li<LEVELS.length && cum>=LEVELS[li]){
+      out.push({level:LEVELS[li], thr:v[i], area:(i+1)/v.length}); li++;
+    }
+  }
+  while(out.length<LEVELS.length) out.push({level:LEVELS[out.length],thr:0,area:1});
+  return out;
+}
+
+// ---- drawing --------------------------------------------------------------
+function draw(field, bands, sim){
+  const W=cv.width;
+  const paper=rgb(css("--paper-2"));
+  const cols=[rgb(css("--band-1")),rgb(css("--band-2")),rgb(css("--band-3")),
+              rgb(css("--band-4")),rgb(css("--band-5"))];
+  const img=octx.createImageData(GRID,GRID);
+  const bandOf=new Uint8Array(GRID*GRID);
+
+  for(let i=0;i<GRID*GRID;i++){
+    const v=field[i]; let b=0;
+    if(S.field==="surv"){
+      b = v>=0.85?4 : v>=0.6?3 : v>=0.35?2 : v>=0.12?1 : 0;
+    } else {
+      b = v>=bands[0].thr?4 : v>=bands[1].thr?3 : v>=bands[2].thr?2 : v>=bands[3].thr?1 : 0;
+    }
+    bandOf[i]=b;
+    const c = b===0?paper:cols[b];
+    const o=i*4; img.data[o]=c[0]; img.data[o+1]=c[1]; img.data[o+2]=c[2]; img.data[o+3]=255;
+  }
+  octx.putImageData(img,0,0);
+  ctx.clearRect(0,0,W,W);
+  ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality="high";
+  ctx.drawImage(off,0,0,W,W);
+
+  const cell=W/GRID;
+  // isopleths: hairlines wherever the band index changes
+  ctx.strokeStyle=css("--ink"); ctx.globalAlpha=.30; ctx.lineWidth=1;
+  ctx.beginPath();
+  for(let y=0;y<GRID;y++) for(let x=0;x<GRID;x++){
+    const b=bandOf[y*GRID+x];
+    if(x+1<GRID && bandOf[y*GRID+x+1]!==b){
+      ctx.moveTo((x+1)*cell,y*cell); ctx.lineTo((x+1)*cell,(y+1)*cell);
+    }
+    if(y+1<GRID && bandOf[(y+1)*GRID+x]!==b){
+      ctx.moveTo(x*cell,(y+1)*cell); ctx.lineTo((x+1)*cell,(y+1)*cell);
+    }
+  }
+  ctx.stroke(); ctx.globalAlpha=1;
+
+  // graticule
+  ctx.strokeStyle=css("--rule"); ctx.globalAlpha=.55; ctx.lineWidth=1;
+  ctx.beginPath();
+  for(let i=1;i<8;i++){ const p=Math.round(W*i/8)+.5;
+    ctx.moveTo(p,0); ctx.lineTo(p,W); ctx.moveTo(0,p); ctx.lineTo(W,p); }
+  ctx.stroke(); ctx.globalAlpha=1;
+
+  // admissible-centre disc
+  if(S.model!=="free"){
+    const R=Math.max(S.r-sim.rs[0],0);
+    ctx.strokeStyle=css("--ink"); ctx.globalAlpha=.45;
+    ctx.setLineDash([4,4]); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(S.x*W,S.y*W,R*W,0,2*Math.PI); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha=1;
+  }
+
+  // guaranteed-safe disc: exact, no model assumption beyond containment
+  const rho = S.model==="free" ? 0 : Math.max(0, 2*sim.rs[S.steps-1]-S.r);
+  if(rho>0){
+    ctx.strokeStyle=css("--ink"); ctx.lineWidth=1.5; ctx.setLineDash([1,3]);
+    ctx.beginPath(); ctx.arc(S.x*W,S.y*W,rho*W,0,2*Math.PI); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // current circle — the only magenta on the plate
+  ctx.strokeStyle=css("--caution"); ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(S.x*W,S.y*W,S.r*W,0,2*Math.PI); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(S.x*W-7,S.y*W); ctx.lineTo(S.x*W+7,S.y*W);
+  ctx.moveTo(S.x*W,S.y*W-7); ctx.lineTo(S.x*W,S.y*W+7); ctx.stroke();
+
+  if(S.pin){
+    ctx.fillStyle=css("--caution");
+    ctx.beginPath(); ctx.arc(S.pin[0]*W,S.pin[1]*W,5,0,2*Math.PI); ctx.fill();
+    ctx.strokeStyle=css("--paper-2"); ctx.lineWidth=1.5; ctx.stroke();
+  }
+}
+
+// ---- pin ------------------------------------------------------------------
+function pinProbs(sim){
+  if(!S.pin) return null;
+  const [px,py]=S.pin;
+  let next=0, all=0;
+  for(let i=0;i<NS;i++){
+    let inAll=true, inNext=false;
+    for(let k=0;k<S.steps;k++){
+      const b=(i*S.steps+k)*2;
+      const d=Math.hypot(sim.paths[b]-px, sim.paths[b+1]-py);
+      const ok = d<=sim.rs[k];
+      if(k===0) inNext=ok;
+      if(!ok) inAll=false;
+    }
+    if(inNext) next++; if(inAll) all++;
+  }
+  return {next:next/NS, all:all/NS};
+}
+
+// ---- update ---------------------------------------------------------------
+let raf=null;
+function update(){
+  if(raf) cancelAnimationFrame(raf);
+  document.querySelector(".plate").classList.add("busy");
+  raf=requestAnimationFrame(()=>{
+    const sim=simulate();
+    const dens=densityField(sim);
+    const bands=hdr(dens);
+    const field = S.field==="surv" ? survivalField(sim) : dens;
+    draw(field,bands,sim);
+
+    document.getElementById("hdr").innerHTML = bands.map(b=>{
+      const conc=b.area>0 ? (b.level/b.area) : 0;
+      return `<tr><td>${Math.round(b.level*100)}%</td><td>${(b.area*100).toFixed(1)}%</td>`+
+             `<td>${conc.toFixed(1)}×</td></tr>`;
+    }).join("");
+    const a90=bands[2].area;
+    document.getElementById("hdrNote").textContent =
+      a90>0.45 ? "At this lookahead the field is close to flat. Treat it as a constraint on where the zone cannot be, not as a read."
+      : a90>0.22 ? "Usably concentrated. The 90% region still covers a lot of ground — plan rotations that stay valid across it."
+      : "Tightly concentrated, because the circle has little room left to move.";
+
+    const rho = S.model==="free" ? 0 : Math.max(0, 2*sim.rs[S.steps-1]-S.r);
+    document.getElementById("safeNote").textContent = S.model==="free"
+      ? "The null baseline drops the containment constraint, so nothing is guaranteed."
+      : rho>0
+        ? `Ground within ${rho.toFixed(3)} of the current centre — the dotted inner ring — is inside the zone for every admissible draw, ${S.steps>1?`all ${S.steps} phases ahead`:"next phase"}. This is geometry, not a forecast.`
+        : `At a ratio of ${S.ratio.toFixed(2)} the circle can shrink past its own centre, so no ground is guaranteed. Centre play stops being risk-free below 0.50.`;
+
+    const p=pinProbs(sim);
+    const pinEl=document.getElementById("pinP"), noteEl=document.getElementById("pinNote");
+    if(p){
+      pinEl.textContent=(p.next*100).toFixed(0)+"%";
+      noteEl.textContent = S.steps>1
+        ? `inside at the next phase — and ${(p.all*100).toFixed(0)}% inside at every phase through ${S.steps} ahead, standing still.`
+        : "chance a team standing here is inside the next zone without moving.";
+    } else {
+      pinEl.textContent="—";
+      noteEl.textContent="Shift-click the chart to test a compound or ridge.";
+    }
+    document.querySelector(".plate").classList.remove("busy");
+  });
+}
+
+// ---- input ----------------------------------------------------------------
+function at(e){
+  const r=cv.getBoundingClientRect();
+  const t=e.touches?e.touches[0]:e;
+  return [Math.min(Math.max((t.clientX-r.left)/r.width,0),1),
+          Math.min(Math.max((t.clientY-r.top)/r.height,0),1)];
+}
+let dragging=false;
+cv.addEventListener("pointerdown",e=>{
+  const [x,y]=at(e);
+  if(e.shiftKey){ S.pin=[x,y]; }
+  else { S.x=x; S.y=y; dragging=true; cv.setPointerCapture(e.pointerId); }
+  update();
+});
+cv.addEventListener("pointermove",e=>{ if(dragging){ const[x,y]=at(e); S.x=x; S.y=y; update(); }});
+cv.addEventListener("pointerup",()=>{dragging=false});
+cv.addEventListener("keydown",e=>{
+  const step=e.shiftKey?0.05:0.01; let h=false;
+  if(e.key==="ArrowLeft"){S.x=Math.max(0,S.x-step);h=true}
+  if(e.key==="ArrowRight"){S.x=Math.min(1,S.x+step);h=true}
+  if(e.key==="ArrowUp"){S.y=Math.max(0,S.y-step);h=true}
+  if(e.key==="ArrowDown"){S.y=Math.min(1,S.y+step);h=true}
+  if(h){e.preventDefault();update()}
+});
+
+function bind(id,key,fmt,parse){
+  const el=document.getElementById(id), out=document.getElementById(id+"V");
+  el.addEventListener("input",()=>{
+    S[key]=parse(el.value);
+    if(out) out.textContent=fmt(S[key]);
+    if(key==="phase"){
+      // deeper phases start smaller; keep the radius plausible when phase moves
+      const r=Math.max(0.02, 0.42*Math.pow(0.72,S.phase-1));
+      S.r=Math.round(r*1000)/1000;
+      document.getElementById("radius").value=S.r;
+      document.getElementById("radiusV").textContent=S.r.toFixed(3);
+    }
+    update();
+  });
+}
+bind("phase","phase",v=>v,v=>+v);
+bind("radius","r",v=>v.toFixed(3),v=>+v);
+bind("ratio","ratio",v=>v.toFixed(2),v=>+v);
+bind("steps","steps",v=>v,v=>+v);
+bind("coast","coast",v=>v.toFixed(2),v=>+v);
+document.getElementById("model").addEventListener("change",e=>{S.model=e.target.value;update()});
+const bD=document.getElementById("bDens"), bS=document.getElementById("bSurv");
+bD.addEventListener("click",()=>{S.field="dens";bD.setAttribute("aria-pressed","true");
+  bS.setAttribute("aria-pressed","false");update()});
+bS.addEventListener("click",()=>{S.field="surv";bS.setAttribute("aria-pressed","true");
+  bD.setAttribute("aria-pressed","false");update()});
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",update);
+
+update();
+})();
+</script>
+<!-- sz:foot -->
+<footer class="sz-foot">
+  <div class="sz-foot-in">
+    <p>Independent analysis toolkit. Not affiliated with, endorsed by, or connected to KRAFTON, Tencent or PUBG Mobile. Zone models test a candidate algorithm from a published patent; weapon figures are community estimates, graded by confidence.</p>
+    <p>© 2026 Janin A Apurba</p>
+  </div>
+</footer>
+<!-- /sz:foot -->
+</body>
+</html>

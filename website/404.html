@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- The server shows this page at whatever broken URL was requested, so links
+     must resolve from the site root. If the site lives in a subfolder, change
+     this to that folder, e.g. <base href="/zone/">, to match .htaccess. -->
+<base href="/">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- sz:head -->
+<meta name="description" content="This page does not exist.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<!-- /sz:head -->
+<title>Page not found · Zone Analyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.lost{padding:48px 0 24px;max-width:560px}
+.lost svg{width:120px;height:120px;color:var(--ink);margin-bottom:18px}
+.lost .ring{fill:none;stroke:var(--caution);stroke-width:2.5}
+.lost .you{fill:none;stroke:currentColor;stroke-width:2.5}
+.lost .zone{fill:var(--sea);fill-opacity:.3}
+.lost .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+</style>
+</head>
+<body class="sz-page">
+<!-- sz:nav -->
+<nav class="sz-nav" aria-label="Site">
+  <div class="sz-nav-in">
+    <a class="sz-brand" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><circle class="core" cx="12" cy="12" r="3.4"/></svg><span>Zone Analyst</span></a>
+    <ul class="sz-links"><li><a href="simulator.html">Simulator</a></li><li><a href="chart.html">Chart</a></li><li><a href="combat.html">Combat math</a></li><li><a href="playbook.html">Playbook</a></li><li><a href="research.html">Research</a></li></ul>
+  </div>
+</nav>
+<!-- /sz:nav -->
+
+<main class="wrap">
+  <section class="lost">
+    <svg viewBox="0 0 120 120" role="img" aria-label="A small safe zone, with a marker for you well outside it">
+      <circle class="zone" cx="44" cy="62" r="26"/>
+      <circle class="ring" cx="44" cy="62" r="26"/>
+      <circle class="you" cx="100" cy="22" r="6"/>
+    </svg>
+    <p class="kicker">404</p>
+    <h1>You're outside the zone.</h1>
+    <p class="lede">This page doesn't exist — it may have moved, or the link was mistyped.</p>
+    <div class="actions">
+      <a class="btn" href="index.html">Back to the home page</a>
+      <a class="btn quiet" href="simulator.html">Open the simulator</a>
+    </div>
+  </section>
+</main>
+
+<!-- sz:foot -->
+<footer class="sz-foot">
+  <div class="sz-foot-in">
+    <p>Independent analysis toolkit. Not affiliated with, endorsed by, or connected to KRAFTON, Tencent or PUBG Mobile. Zone models test a candidate algorithm from a published patent; weapon figures are community estimates, graded by confidence.</p>
+    <p>© 2026 Janin A Apurba</p>
+  </div>
+</footer>
+<!-- /sz:foot -->
+</body>
+</html>

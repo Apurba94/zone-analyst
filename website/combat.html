@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- sz:head -->
+<meta name="description" content="The ammunition budget of a 1v4, the armour sensitivity grid, and ranked double-gun loadouts, computed live from a sourced weapon database.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<!-- /sz:head -->
+<title>Combat math · Zone Analyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.page-head{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:22px}
+.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(270px,1fr);gap:22px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.layout > *{min-width:0}
+
+/* hero number: the one figure the page exists to answer */
+.hero{display:flex;gap:20px;align-items:center;flex-wrap:wrap;padding-bottom:14px;margin-bottom:6px;border-bottom:1px solid var(--rule)}
+.hero-num{font-family:Spectral,Georgia,serif;font-variant-numeric:tabular-nums;font-size:60px;line-height:.95;letter-spacing:-.02em;min-width:2.2ch}
+.hero-meta{flex:1;min-width:220px}
+.hero-meta .label{font-size:12.5px;color:var(--ink-soft);margin:0 0 6px}
+.hero-meta p.verdict{margin:8px 0 0;font-size:14.5px}
+
+table.kv td{padding:6px 0}
+table.kv td.r{font-family:Spectral,Georgia,serif;font-variant-numeric:tabular-nums;font-size:15.5px}
+
+/* sensitivity grid — a 2px surface gap separates the tinted cells */
+table.grid{border-collapse:separate;border-spacing:3px;margin:6px -3px}
+table.grid th,table.grid td{border:0;text-align:center;padding:8px 6px}
+table.grid thead th{padding-bottom:4px}
+table.grid tbody th{text-align:left;font-family:Spectral,Georgia,serif;font-variant-numeric:tabular-nums;
+  font-size:15px;letter-spacing:0;text-transform:none;color:var(--ink);font-weight:400;width:26%}
+table.grid td{font-family:Spectral,Georgia,serif;font-variant-numeric:tabular-nums;font-size:16px;
+  color:var(--ink);cursor:default;position:relative}
+table.grid td.fit{background:var(--ok-tint)}
+table.grid td.over{background:var(--short-tint)}
+table.grid td .g{font-family:Archivo,sans-serif;font-size:12px;font-weight:700;margin-left:6px}
+table.grid td.fit .g{color:var(--ok)}
+table.grid td.over .g{color:var(--short)}
+table.grid td.here{box-shadow:inset 0 0 0 2px var(--ink)}
+.grid-key{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:8px 0 0}
+
+.tip{position:fixed;z-index:20;pointer-events:none;background:var(--ink);color:var(--paper);
+  font-size:12.5px;line-height:1.45;padding:7px 10px;max-width:250px;opacity:0;transition:opacity .08s}
+.tip.on{opacity:1}
+
+/* pairs + database */
+table.pairs td,table.db td{font-size:14px}
+table.pairs td .sub{display:block;font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+table.pairs td.num,table.db td.num{font-family:Spectral,Georgia,serif;font-variant-numeric:tabular-nums;font-size:15px}
+table.db td:first-child{font-weight:600;white-space:nowrap}
+table.db td.wnote{color:var(--ink-soft);font-size:13px;min-width:220px}
+.conf{white-space:nowrap;font-size:13px}
+.conf i{font-style:normal;letter-spacing:1px;color:var(--ink-soft)}
+
+/* controls */
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px}
+.field .val{font-family:Spectral,Georgia,serif;font-variant-numeric:tabular-nums;color:var(--ink);font-size:14px}
+input[type=range]{width:100%;accent-color:var(--sea);height:22px;background:transparent;margin:0}
+select{width:100%;font-family:Archivo,sans-serif;font-size:14px;padding:7px 8px;color:var(--ink);
+  background:var(--paper);border:1px solid var(--rule);border-radius:0}
+.db-panel{margin-top:22px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body class="sz-page">
+<!-- sz:nav -->
+<nav class="sz-nav" aria-label="Site">
+  <div class="sz-nav-in">
+    <a class="sz-brand" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><circle class="core" cx="12" cy="12" r="3.4"/></svg><span>Zone Analyst</span></a>
+    <ul class="sz-links"><li><a href="simulator.html">Simulator</a></li><li><a href="chart.html">Chart</a></li><li><a href="combat.html" aria-current="page">Combat math</a></li><li><a href="playbook.html">Playbook</a></li><li><a href="research.html">Research</a></li></ul>
+  </div>
+</nav>
+<!-- /sz:nav -->
+
+<main class="wrap">
+  <header class="page-head">
+    <p class="kicker">Combat math</p>
+    <h1>Can one gun finish a 1v4?</h1>
+    <p class="lede">What a clutch costs in ammunition before skill enters the picture, and why the
+    loadout that wins a clutch is not the loadout your team runs.</p>
+  </header>
+
+  <div class="layout">
+    <div>
+      <section class="panel" aria-labelledby="budget-h">
+        <h2 id="budget-h">Ammunition budget: <span id="bWeapon">M416</span></h2>
+        <div class="panel-body">
+          <div class="hero">
+            <div class="hero-num" id="bMargin" aria-describedby="bMarginLabel">0</div>
+            <div class="hero-meta">
+              <p class="label" id="bMarginLabel">rounds of margin on one extended magazine</p>
+              <span class="chip edge" id="bChip">Knife-edge</span>
+              <p class="verdict" id="bVerdict"></p>
+            </div>
+          </div>
+          <table class="kv">
+            <tbody>
+              <tr><td>Hits to knock one enemy</td><td class="r" id="bHitsOne"></td></tr>
+              <tr><td>Hits to knock the whole squad</td><td class="r" id="bHitsAll"></td></tr>
+              <tr><td>Rounds you must <b>fire</b>, at your hit rate</td><td class="r" id="bRounds"></td></tr>
+              <tr><td>Rounds in one extended magazine</td><td class="r" id="bMag"></td></tr>
+              <tr><td>Swapping instead of reloading saves</td><td class="r" id="bSwap"></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="grid-h">
+        <h2 id="grid-h">Rounds to fire, by hit rate and enemy armour</h2>
+        <div class="panel-body">
+          <p class="small">Each cell is what knocking the squad costs at that accuracy and armour,
+          measured against <b id="gMag">40</b> rounds in one magazine. Hover or tab onto a cell for
+          the arithmetic.</p>
+          <div class="table-scroll">
+            <table class="grid" id="grid">
+              <thead><tr><th scope="col">Hit rate</th><th scope="col">Level 1 vest</th><th scope="col">Level 2 vest</th><th scope="col">Level 3 vest</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="grid-key small">
+            <span class="chip ok">Fits one magazine</span>
+            <span class="chip short">Needs a reload</span>
+            <span>Outlined cell: closest to your assumptions</span>
+          </div>
+          <p class="rulebox" id="gFinding" style="margin:14px 0 0"></p>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="pairs-h">
+        <h2 id="pairs-h">Double-gun loadouts, ranked by margin</h2>
+        <div class="panel-body">
+          <div class="table-scroll">
+            <table class="pairs" id="pairs">
+              <thead><tr><th scope="col">Loadout</th><th scope="col">Both guns work inside 30 m</th><th scope="col" class="r">Usable rounds</th><th scope="col" class="r">Margin</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="small" style="margin-top:10px">Margin is usable rounds minus rounds needed. A
+          marksman rifle or sniper contributes nothing at fifteen metres, so those pairings score
+          exactly as one gun would — which is the case for changing weapons when your last teammate
+          goes down.</p>
+        </div>
+      </section>
+    </div>
+
+    <aside>
+      <section class="panel">
+        <h2>Weapon under test</h2>
+        <div class="panel-body">
+          <select id="weapon" aria-label="Weapon under test"></select>
+          <p class="small" style="margin:8px 0 0">Shotguns are left out: their damage figure is total
+          pellet damage at point blank, which this model would read as a single perfect hit.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Fight assumptions</h2>
+        <div class="panel-body">
+          <div class="field"><label for="enemies">Enemies to knock <span class="val" id="enemiesV"></span></label>
+            <input type="range" id="enemies" min="1" max="4" step="1"></div>
+          <div class="field"><label for="armour">Armour damage reduction <span class="val" id="armourV"></span></label>
+            <input type="range" id="armour" min="0.2" max="0.6" step="0.05"></div>
+          <div class="field"><label for="hitRate">Your hit rate <span class="val" id="hitRateV"></span></label>
+            <input type="range" id="hitRate" min="0.15" max="0.6" step="0.05"></div>
+          <div class="field"><label for="mult">Hit-location multiplier <span class="val" id="multV"></span></label>
+            <input type="range" id="mult" min="0.7" max="1.5" step="0.05"></div>
+          <div class="field"><label for="swap">Weapon swap time <span class="val" id="swapV"></span></label>
+            <input type="range" id="swap" min="0.3" max="1.5" step="0.05"></div>
+          <p class="small" style="margin:10px 0 0">Armour reduction and swap time are unverified
+          placeholders. Measure swap time first: the double-gun case scales with it, and nobody
+          publishes it. Take your hit rate from your own replays, not from hope.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Workbook</h2>
+        <div class="panel-body">
+          <p class="small">The same model as a spreadsheet, with a private-lobby protocol for replacing
+          these numbers with your own measurements.</p>
+          <a class="btn" href="downloads/pubgm-combat-math.xlsx" download>Download the workbook (.xlsx)</a>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <section class="panel db-panel" aria-labelledby="db-h">
+    <h2 id="db-h">Weapon database</h2>
+    <div class="panel-body">
+      <p class="note"><b>Read before quoting.</b> PUBG Mobile publishes no weapon statistics — the
+      game shows a power bar. Every figure here is a community private-lobby estimate, sources
+      disagree (two put the M416 at 41 and 43), and reload times could not be sourced for most
+      weapons. Each row carries its own confidence grade; a dash is a genuine gap, not a zero.</p>
+      <div class="table-scroll">
+        <table class="db" id="db">
+          <thead><tr><th scope="col">Weapon</th><th scope="col">Class</th><th scope="col" class="r">Damage</th><th scope="col" class="r">Mag / ext</th><th scope="col" class="r">Reload</th><th scope="col" class="r">Hits to knock</th><th scope="col">Confidence</th><th scope="col">Note</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script src="assets/combat-model.js"></script>
+<script>
+(function(){
+"use strict";
+const C = window.ZoneCombat;
+const $ = id => document.getElementById(id);
+if(!C){ document.querySelector("main").insertAdjacentHTML("afterbegin",
+  '<p class="note"><b>The combat model did not load.</b> Keep assets/combat-model.js next to this page.</p>'); return; }
+
+const S = Object.assign({}, C.DEFAULT_INPUTS);
+let weapon = "M416";
+
+const pct = v => Math.round(v * 100) + "%";
+const signed = v => v > 0 ? "+" + v : v < 0 ? "−" + Math.abs(v) : "0";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const TONE = { bad:["short","Short"], warn:["edge","Knife-edge"], ok:["ok","Covered"] };
+const toneOf = m => m === null ? "warn" : m < 0 ? "bad" : m <= 8 ? "warn" : "ok";
+
+// ---- weapon selector ----------------------------------------------------
+const GROUPS = [["AR","Assault rifles"],["DMR","Marksman rifles"],["SR","Sniper rifles"],["SMG","SMGs"],["LMG","LMGs"]];
+$("weapon").innerHTML = GROUPS.map(([cls,label]) => {
+  const opts = C.WEAPONS.filter(w => w.cls === cls && w.dmg !== null)
+    .map(w => `<option value="${esc(w.name)}"${w.name === weapon ? " selected" : ""}>${esc(w.name)}</option>`).join("");
+  return opts ? `<optgroup label="${label}">${opts}</optgroup>` : "";
+}).join("");
+$("weapon").addEventListener("change", e => { weapon = e.target.value; render(); });
+
+// ---- sliders ------------------------------------------------------------
+const SLIDERS = {
+  enemies: v => String(v),
+  armour:  v => pct(v),
+  hitRate: v => pct(v),
+  mult:    v => v.toFixed(2) + "×",
+  swap:    v => v.toFixed(2) + " s",
+};
+Object.keys(SLIDERS).forEach(k => {
+  const el = $(k);
+  el.value = S[k];
+  $(k + "V").textContent = SLIDERS[k](S[k]);
+  el.addEventListener("input", () => {
+    S[k] = Number((+el.value).toFixed(2));
+    $(k + "V").textContent = SLIDERS[k](S[k]);
+    render();
+  });
+});
+
+// ---- tooltip ------------------------------------------------------------
+const tip = $("tip");
+function showTip(cell){
+  tip.textContent = cell.dataset.tip;
+  const r = cell.getBoundingClientRect();
+  tip.classList.add("on");
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  let x = r.left + r.width / 2 - tw / 2, y = r.top - th - 8;
+  x = Math.max(8, Math.min(x, window.innerWidth - tw - 8));
+  if (y < 8) y = r.bottom + 8;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip(){ tip.classList.remove("on"); }
+
+// ---- render -------------------------------------------------------------
+function render(){
+  const w = C.WEAPONS.find(x => x.name === weapon);
+  const b = C.budget(w, S);
+  $("bWeapon").textContent = w.name;
+
+  if (!b) { $("bMargin").textContent = "—"; $("bVerdict").textContent = "No damage figure on record for this weapon."; return; }
+
+  const [cls, word] = TONE[b.tone] || TONE.warn;
+  $("bMargin").textContent = b.margin === null ? "—" : signed(b.margin);
+  $("bChip").className = "chip " + cls; $("bChip").textContent = word;
+  $("bVerdict").textContent = b.verdict;
+  $("bHitsOne").textContent = b.hitsOne;
+  $("bHitsAll").textContent = b.hitsAll;
+  $("bRounds").textContent = b.roundsNeeded;
+  $("bMag").textContent = b.magCapacity === null ? "—" : b.magCapacity;
+  $("bSwap").textContent = w.reload === null ? "reload not sourced" : (w.reload - S.swap).toFixed(2) + " s";
+
+  // grid
+  const mag = b.magCapacity ?? 0;
+  $("gMag").textContent = mag;
+  const grid = C.sensitivityGrid(w, S);
+  const hereRow = nearest(C.HIT_RATES, S.hitRate);
+  const hereCol = nearest(C.ARMOUR_LEVELS.map(a => a.v), S.armour);
+  let fits = 0, lv3fits = 0;
+  $("grid").tBodies[0].innerHTML = grid.map((row, i) => {
+    const hr = C.HIT_RATES[i];
+    return `<tr><th scope="row">${pct(hr)}</th>` + row.map((v, j) => {
+      if (v === null) return "<td>—</td>";
+      const ok = v <= mag; if (ok) { fits++; if (j === 2) lv3fits++; }
+      const lab = C.ARMOUR_LEVELS[j].label.replace("Lv", "Level ");
+      const gap = ok ? `${mag - v} to spare` : `${v - mag} short`;
+      const text = `${pct(hr)} hit rate against a ${lab} vest: fire ${v} rounds to knock ${S.enemies === 1 ? "one enemy" : "the squad"}; one magazine holds ${mag}, so ${gap}.`;
+      const here = i === hereRow && j === hereCol;
+      return `<td class="${ok ? "fit" : "over"}${here ? " here" : ""}" tabindex="0" data-tip="${esc(text)}" aria-label="${esc(text)}${here ? " (closest to your assumptions)" : ""}">${v}<span class="g" aria-hidden="true">${ok ? "✓" : "✕"}</span></td>`;
+    }).join("") + "</tr>";
+  }).join("");
+  $("grid").querySelectorAll("td[data-tip]").forEach(td => {
+    td.addEventListener("mouseenter", () => showTip(td));
+    td.addEventListener("focus", () => showTip(td));
+    td.addEventListener("mouseleave", hideTip);
+    td.addEventListener("blur", hideTip);
+  });
+
+  const total = grid.length * C.ARMOUR_LEVELS.length;
+  $("gFinding").textContent = lv3fits === 0
+    ? `Only ${fits} of these ${total} combinations fit in one magazine, and none against Level 3 armour — which is what the survivors wear in the last circles, exactly where clutches happen.`
+    : `${fits} of these ${total} combinations fit in one magazine with the ${w.name}, including ${lv3fits} against Level 3 armour.`;
+
+  // pairs
+  const pairs = C.pairAnalysis(S, weapon);
+  $("pairs").tBodies[0].innerHTML = pairs.map(p => {
+    const t = TONE[toneOf(p.margin)];
+    return `<tr>
+      <td><b>${esc(p.pair.a)} + ${esc(p.pair.b)}</b><span class="sub">${esc(p.pair.label)} · ${esc(p.pair.note)}</span></td>
+      <td>${p.bothUsable ? '<span class="chip ok">Yes</span>' : '<span class="chip short">Second gun is dead weight</span>'}</td>
+      <td class="num r">${p.total ?? "—"}</td>
+      <td class="r"><span class="chip ${t[0]}">${p.margin === null ? "—" : signed(p.margin)}</span></td>
+    </tr>`;
+  }).join("");
+
+  // database
+  $("db").tBodies[0].innerHTML = C.WEAPONS.map(x => {
+    const row = C.fightMath(x, S);
+    const dots = x.conf === "Medium" ? "●●○" : x.conf === "Low" ? "●○○" : "○○○";
+    const conf = x.conf === "UNMEASURED" ? "None" : x.conf;
+    return `<tr>
+      <td>${esc(x.name)}</td><td>${x.cls} · ${esc(x.ammo)}</td>
+      <td class="num r">${x.dmg ?? "—"}${x.dmgAlt !== null ? ` <span class="small">(${x.dmgAlt})</span>` : ""}</td>
+      <td class="num r">${x.mag ?? "—"}${x.ext ? " / " + x.ext : ""}</td>
+      <td class="num r">${x.reload === null ? "—" : x.reload + " s"}</td>
+      <td class="num r">${row.hitsToKnock ?? "—"}</td>
+      <td class="conf"><i aria-hidden="true">${dots}</i> ${conf}</td>
+      <td class="wnote">${esc(x.note)}</td>
+    </tr>`;
+  }).join("");
+}
+
+function nearest(arr, v){ let bi = 0; arr.forEach((a, i) => { if (Math.abs(a - v) < Math.abs(arr[bi] - v)) bi = i; }); return bi; }
+
+render();
+})();
+</script>
+<!-- sz:foot -->
+<footer class="sz-foot">
+  <div class="sz-foot-in">
+    <p>Independent analysis toolkit. Not affiliated with, endorsed by, or connected to KRAFTON, Tencent or PUBG Mobile. Zone models test a candidate algorithm from a published patent; weapon figures are community estimates, graded by confidence.</p>
+    <p>© 2026 Janin A Apurba</p>
+  </div>
+</footer>
+<!-- /sz:foot -->
+</body>
+</html>

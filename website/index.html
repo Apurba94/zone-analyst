@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- sz:head -->
+<meta name="description" content="Competitive blue-zone and fight analytics: a live zone simulator, the probability chart behind circle reads, 1v4 combat math, and a playbook for the 2026 map pool.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<!-- /sz:head -->
+<title>Zone Analyst — blue-zone and fight analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,440px);gap:36px;align-items:center;
+  padding:10px 0 34px;border-bottom:2px solid var(--ink)}
+@media (max-width:860px){.hero{grid-template-columns:minmax(0,1fr);gap:18px}}
+.hero h1{font-size:clamp(34px,5vw,50px)}
+.hero .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+
+figure.geo{margin:0}
+figure.geo svg{display:block;width:100%;height:auto;color:var(--ink);font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+figure.geo figcaption{font-size:13px;line-height:1.5;color:var(--ink-soft);margin-top:10px}
+.g-current{fill:none;stroke:var(--caution);stroke-width:2.5}
+.g-next{fill:none;stroke:currentColor;stroke-width:1.4;opacity:.6}
+.g-range{fill:none;stroke:currentColor;stroke-width:1.2;stroke-dasharray:5 4;opacity:.8}
+.g-safe{fill:var(--sea);fill-opacity:.32;stroke:currentColor;stroke-width:1.2;stroke-dasharray:1.5 3}
+.g-dot{fill:currentColor;opacity:.75}
+.g-lead{stroke:currentColor;stroke-width:1;opacity:.5}
+.g-text{fill:currentColor;font-size:13px}
+.g-text.in{font-size:12px;text-anchor:middle}
+
+section.block{padding:34px 0 6px}
+section.block > h2{padding-bottom:8px;border-bottom:1px solid var(--rule);margin-bottom:18px}
+
+.findings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.findings{grid-template-columns:minmax(0,1fr)}}
+.finding{border:1px solid var(--rule);background:var(--paper-2);padding:16px 16px 14px;display:flex;flex-direction:column}
+.finding .big{font-family:Spectral,Georgia,serif;font-variant-numeric:tabular-nums;font-size:40px;line-height:1;letter-spacing:-.02em;margin-bottom:10px}
+.finding h3{font-size:18px}
+.finding p{font-size:14.5px;color:var(--ink-soft);flex:1}
+.finding a{font-size:14px}
+
+.tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+@media (max-width:1060px){.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.tools{grid-template-columns:minmax(0,1fr)}}
+a.tool{display:block;border:1px solid var(--rule);background:var(--paper-2);padding:15px 16px;text-decoration:none;color:var(--ink)}
+a.tool:hover{border-color:var(--ink)}
+a.tool h3{font-size:18px;margin-bottom:4px}
+a.tool p{font-size:14px;color:var(--ink-soft);margin:0}
+
+.honest{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+@media (max-width:860px){.honest{grid-template-columns:minmax(0,1fr);gap:4px}}
+.honest h3{font-size:16px}
+.honest p{font-size:14.5px;color:var(--ink-soft)}
+</style>
+</head>
+<body class="sz-page">
+<!-- sz:nav -->
+<nav class="sz-nav" aria-label="Site">
+  <div class="sz-nav-in">
+    <a class="sz-brand" href="index.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><circle class="core" cx="12" cy="12" r="3.4"/></svg><span>Zone Analyst</span></a>
+    <ul class="sz-links"><li><a href="simulator.html">Simulator</a></li><li><a href="chart.html">Chart</a></li><li><a href="combat.html">Combat math</a></li><li><a href="playbook.html">Playbook</a></li><li><a href="research.html">Research</a></li></ul>
+  </div>
+</nav>
+<!-- /sz:nav -->
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <p class="kicker">Competitive PUBG Mobile analytics</p>
+      <h1>Read the zone. Budget the fight.</h1>
+      <p class="lede">A live zone simulator, the probability chart behind circle reads, the arithmetic
+      of a 1v4, and a playbook for the 2026 tournament pool — built on a published candidate
+      algorithm and honest about what hasn't been measured.</p>
+      <div class="actions">
+        <a class="btn" href="simulator.html">Open the simulator</a>
+        <a class="btn quiet" href="research.html">Read the research</a>
+      </div>
+    </div>
+
+    <figure class="geo">
+      <svg viewBox="0 0 400 320" role="img"
+        aria-label="A current zone with two extreme possible next zones pushed to opposite edges. Both still contain a shaded core around the current centre, so that core is safe whichever way the next zone moves.">
+        <!-- centre range: where the next centre may land (radius r - r' = 49.4) -->
+        <circle class="g-range" cx="140" cy="160" r="49.4"/>
+        <!-- two extreme next zones (radius r' = 80.6), centres on the range edge -->
+        <circle class="g-next" cx="90.6" cy="160" r="80.6"/>
+        <circle class="g-next" cx="189.4" cy="160" r="80.6"/>
+        <circle class="g-dot" cx="90.6" cy="160" r="2.6"/>
+        <circle class="g-dot" cx="189.4" cy="160" r="2.6"/>
+        <!-- guaranteed-safe core (radius 2r' - r = 31.2) -->
+        <circle class="g-safe" cx="140" cy="160" r="31.2"/>
+        <text class="g-text in" x="140" y="157">always</text>
+        <text class="g-text in" x="140" y="171">safe</text>
+        <!-- current zone (radius r = 130) -->
+        <circle class="g-current" cx="140" cy="160" r="130"/>
+
+        <!-- labels -->
+        <line class="g-lead" x1="278" y1="38" x2="217" y2="52"/>
+        <text class="g-text" x="282" y="42">current zone</text>
+
+        <line class="g-lead" x1="278" y1="104" x2="238" y2="95"/>
+        <text class="g-text" x="282" y="100">two extreme</text>
+        <text class="g-text" x="282" y="116">next zones</text>
+
+        <line class="g-lead" x1="278" y1="200" x2="183" y2="189"/>
+        <text class="g-text" x="282" y="196">next centre</text>
+        <text class="g-text" x="282" y="212">lands in here</text>
+      </svg>
+      <figcaption>Why the centre is free when the zone shrinks gently. The next zone (radius r′) must
+      fit inside the current one (radius r), so its centre lands somewhere in the dashed ring, radius
+      r − r′. Push it to opposite edges and both extremes still cover the shaded core, radius
+      2r′ − r. Drawn at a shrink ratio of 0.62; below 0.5 the core disappears.</figcaption>
+    </figure>
+  </section>
+
+  <section class="block" aria-labelledby="find-h">
+    <h2 id="find-h">Three findings</h2>
+    <div class="findings">
+      <article class="finding">
+        <div class="big">0.5</div>
+        <h3>Above this shrink ratio, the centre is free</h3>
+        <p>A disc of radius 2r′ − r around the current centre cannot be caught outside the next zone.
+        It is geometry, not a forecast, and it needs no match data — only the radius schedule.</p>
+        <a href="chart.html">See it on the chart</a>
+      </article>
+      <article class="finding">
+        <div class="big">±0.79</div>
+        <h3>Late circles can't be read from broadcast video</h3>
+        <p>Circle-fitting error, carried through the key statistic, grows from ±0.012 at phase 1 to
+        ±0.79 at phase 8, on a scale of 0 to 1. Phases 1–4 hold the usable signal.</p>
+        <a href="research.html#measurement-precision">Read the precision analysis</a>
+      </article>
+      <article class="finding">
+        <div class="big">4 of 18</div>
+        <h3>One magazine rarely covers a 1v4</h3>
+        <p>Of eighteen accuracy-and-armour cases, four fit in an extended M416 magazine — none of them
+        against Level 3 armour, which is what the survivors wear when clutches happen.</p>
+        <a href="combat.html">Run the numbers</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="tools-h">
+    <h2 id="tools-h">The tools</h2>
+    <div class="tools">
+      <a class="tool" href="simulator.html"><h3>Zone simulator</h3>
+        <p>Watch the zone close, drag a team into its path, and see whether they get out. Every match
+        feeds a live test battery.</p></a>
+      <a class="tool" href="chart.html"><h3>Probability chart</h3>
+        <p>Where the next centre can land versus where a team can stand and stay inside. Different
+        questions; positioning needs the second.</p></a>
+      <a class="tool" href="combat.html"><h3>Combat math</h3>
+        <p>The ammunition a 1v4 costs, the armour grid, and double-gun loadouts ranked by margin.</p></a>
+      <a class="tool" href="playbook.html"><h3>Playbook</h3>
+        <p>Anti-rush defence, the 1v4 clutch method, and Erangel, Miramar and Rondo map by map.</p></a>
+      <a class="tool" href="research.html"><h3>Research report</h3>
+        <p>The method, the patent evidence, the power analysis, and what is still unmeasured.</p></a>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="honest-h">
+    <h2 id="honest-h">What this is, and isn't</h2>
+    <div class="honest">
+      <div><h3>A candidate, tested — not a leak</h3>
+        <p>The zone models come from a published Tencent patent describing a centre-selection
+        routine. A patent describes an embodiment, not shipped code, and no tournament matches have
+        been annotated yet.</p></div>
+      <div><h3>Community numbers, graded</h3>
+        <p>PUBG Mobile publishes no weapon statistics. Every figure here is a private-lobby estimate,
+        the sources disagree, and each row says how much to trust it.</p></div>
+      <div><h3>Built to take your measurements</h3>
+        <p>Everything computes from inputs you can replace with your own timings and tests. Quote the
+        method, not the numbers — then measure and re-run.</p>
+        <a class="btn quiet" href="downloads/pubgm-combat-math.xlsx" download>Download the combat workbook</a></div>
+    </div>
+  </section>
+</main>
+
+<!-- sz:foot -->
+<footer class="sz-foot">
+  <div class="sz-foot-in">
+    <p>Independent analysis toolkit. Not affiliated with, endorsed by, or connected to KRAFTON, Tencent or PUBG Mobile. Zone models test a candidate algorithm from a published patent; weapon figures are community estimates, graded by confidence.</p>
+    <p>© 2026 Janin A Apurba</p>
+  </div>
+</footer>
+<!-- /sz:foot -->
+</body>
+</html>

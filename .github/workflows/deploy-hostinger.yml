@@ -1,0 +1,42 @@
+# Uploads ONLY the website/ folder to Hostinger over FTP. Never runs by itself:
+# start it from the Actions tab. The first run defaults to a dry run, which
+# lists what would change without touching the server.
+#
+# Setup (docs/DEPLOY_HOSTINGER.md walks through it):
+#   Repository secrets:   HOSTINGER_FTP_HOST, HOSTINGER_FTP_USER, HOSTINGER_FTP_PASSWORD
+#   Repository variables: HOSTINGER_FTP_DIR       (e.g. public_html/zone/ — must end in /)
+#                         HOSTINGER_FTP_PROTOCOL  (optional: ftps by default, ftp if TLS fails)
+
+name: Deploy website to Hostinger
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run: list what would change, upload nothing"
+        type: boolean
+        default: true
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the site before uploading
+        run: python3 scripts/check_site.py
+
+      - name: Upload website/ to Hostinger
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.HOSTINGER_FTP_HOST }}
+          username: ${{ secrets.HOSTINGER_FTP_USER }}
+          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          protocol: ${{ vars.HOSTINGER_FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./website/
+          server-dir: ${{ vars.HOSTINGER_FTP_DIR }}
+          dry-run: ${{ inputs.dry_run }}
