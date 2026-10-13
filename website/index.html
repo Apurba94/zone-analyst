@@ -55,7 +55,17 @@ a.tool p{font-size:14px;color:var(--ink-soft);margin:0}
 @media (max-width:860px){.honest{grid-template-columns:minmax(0,1fr);gap:4px}}
 .honest h3{font-size:16px}
 .honest p{font-size:14.5px;color:var(--ink-soft)}
+
+.apps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
+@media (max-width:860px){.apps{grid-template-columns:minmax(0,1fr)}}
+.app{border:1px solid var(--rule);background:var(--paper-2);padding:16px 16px 18px;display:flex;flex-direction:column;align-items:flex-start}
+.app h3{font-size:18px}
+.app p{font-size:14.5px;color:var(--ink-soft);flex:1}
+.app .actions{display:flex;flex-wrap:wrap;gap:8px}
+/* The desktop and Android apps load this same page; they don't need to offer themselves. */
+.in-app .get-app{display:none}
 </style>
+<script>/ZoneAnalystApp/.test(navigator.userAgent)&&document.documentElement.classList.add("in-app")</script>
 </head>
 <body class="sz-page">
 <!-- sz:nav -->
@@ -162,6 +172,39 @@ a.tool p{font-size:14px;color:var(--ink-soft);margin:0}
     </div>
   </section>
 
+  <section class="block get-app" aria-labelledby="app-h">
+    <h2 id="app-h">Get the app</h2>
+    <div class="apps">
+      <div class="app">
+        <h3>Windows</h3>
+        <p>Every tool on this site as a desktop program that works offline. Windows 10 and 11, 64-bit.</p>
+        <div class="actions">
+          <a class="btn" href="https://github.com/Apurba94/zone-analyst/releases/latest/download/Zone-Analyst-Setup.exe">Download installer</a>
+          <a class="btn quiet" href="https://github.com/Apurba94/zone-analyst/releases/latest/download/Zone-Analyst-Portable.exe">Portable .exe</a>
+        </div>
+      </div>
+      <div class="app">
+        <h3>Android</h3>
+        <p>The same site packaged as an app that works offline. Android 7 or newer; installed from the APK
+        file, not Google Play.</p>
+        <div class="actions">
+          <a class="btn" href="https://github.com/Apurba94/zone-analyst/releases/latest/download/Zone-Analyst.apk">Download APK</a>
+        </div>
+      </div>
+      <div class="app">
+        <h3>Source</h3>
+        <p>The website, the Python research toolkit, the workbook and both apps, with every release.</p>
+        <div class="actions">
+          <a class="btn quiet" href="https://github.com/Apurba94/zone-analyst">View on GitHub</a>
+          <a class="btn quiet" href="https://github.com/Apurba94/zone-analyst/releases">All releases</a>
+        </div>
+      </div>
+    </div>
+    <p class="note">Neither app carries a paid code-signing certificate. Windows SmartScreen may say it
+    doesn't recognise the installer: choose <b>More info → Run anyway</b>. Android asks you to allow
+    installs from your browser the first time.</p>
+  </section>
+
   <section class="block" aria-labelledby="honest-h">
     <h2 id="honest-h">What this is, and isn't</h2>
     <div class="honest">
@@ -184,7 +227,7 @@ a.tool p{font-size:14px;color:var(--ink-soft);margin:0}
 <footer class="sz-foot">
   <div class="sz-foot-in">
     <p>Independent analysis toolkit. Not affiliated with, endorsed by, or connected to KRAFTON, Tencent or PUBG Mobile. Zone models test a candidate algorithm from a published patent; weapon figures are community estimates, graded by confidence.</p>
-    <p>© 2026 Janin A Apurba</p>
+    <p>© 2026 Janin A Apurba · <a href="https://github.com/Apurba94/zone-analyst">Source on GitHub</a></p>
   </div>
 </footer>
 <!-- /sz:foot -->

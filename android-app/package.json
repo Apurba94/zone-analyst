@@ -1,0 +1,21 @@
+{
+  "name": "zone-analyst-android",
+  "version": "1.0.0",
+  "description": "Zone Analyst for Android: the website packaged as an offline APK with Capacitor.",
+  "author": "Janin A Apurba",
+  "homepage": "https://zoneanalyst.vercel.app",
+  "private": true,
+  "scripts": {
+    "copy-web": "node scripts/copy-web.mjs",
+    "sync": "npm run copy-web && cap sync android",
+    "icons": "npx --yes @capacitor/assets@3.0.5 generate --android --iconBackgroundColor #132430 --iconBackgroundColorDark #132430 --splashBackgroundColor #132430 --splashBackgroundColorDark #132430",
+    "open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/core": "8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3"
+  }
+}

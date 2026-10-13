@@ -16,7 +16,8 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 SITE = Path(__file__).resolve().parents[1] / "website"
-ALLOWED_HOSTS = {"fonts.googleapis.com", "fonts.gstatic.com"}
+# github.com hosts the source and the release downloads (Windows .exe, Android .apk).
+ALLOWED_HOSTS = {"fonts.googleapis.com", "fonts.gstatic.com", "github.com"}
 MARKERS = ("<!-- sz:head -->", "<!-- sz:nav -->", "<!-- sz:foot -->")
 
 

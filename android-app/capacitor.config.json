@@ -1,0 +1,10 @@
+{
+  "appId": "io.github.apurba94.zoneanalyst",
+  "appName": "Zone Analyst",
+  "webDir": "www",
+  "appendUserAgent": "ZoneAnalystApp",
+  "backgroundColor": "#132430",
+  "android": {
+    "allowMixedContent": false
+  }
+}

@@ -1,5 +1,12 @@
 # Publishing the project on GitHub
 
+> **Published:** [github.com/Apurba94/zone-analyst](https://github.com/Apurba94/zone-analyst).
+> The website deploys from it to [zoneanalyst.vercel.app](https://zoneanalyst.vercel.app)
+> on every push to `main` ([DEPLOY_VERCEL.md](DEPLOY_VERCEL.md)), and each `v*`
+> tag publishes the Windows and Android apps under
+> [Releases](https://github.com/Apurba94/zone-analyst/releases). The steps
+> below are how a copy of the project gets onto GitHub in the first place.
+
 The project folder is already a Git repository with its first commit, so its
 history and authorship come with it. Publishing it only has to connect that
 repository to your GitHub account.

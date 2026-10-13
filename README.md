@@ -1,8 +1,14 @@
 # Zone Analyst
 
-Competitive blue-zone and fight analytics for PUBG Mobile: a website, a Python
-research toolkit, a combat-math workbook and an Expo mobile app, all built on
-the same models.
+Competitive blue-zone and fight analytics for PUBG Mobile: a website, a Windows
+app, an Android app, a Python research toolkit, a combat-math workbook and an
+Expo mobile app, all built on the same models.
+
+**Use it online: [zoneanalyst.vercel.app](https://zoneanalyst.vercel.app)** ·
+**Download:** [Windows installer](https://github.com/Apurba94/zone-analyst/releases/latest/download/Zone-Analyst-Setup.exe) ·
+[Windows portable](https://github.com/Apurba94/zone-analyst/releases/latest/download/Zone-Analyst-Portable.exe) ·
+[Android APK](https://github.com/Apurba94/zone-analyst/releases/latest/download/Zone-Analyst.apk) ·
+[all releases](https://github.com/Apurba94/zone-analyst/releases)
 
 The zone models test a candidate algorithm described in a published Tencent
 patent. The weapon numbers are community estimates, graded by confidence.
@@ -12,23 +18,46 @@ Neither is a measurement of the live game, and every page says so.
 
 | Folder | What it is | Start here |
 |---|---|---|
-| `website/` | Static site: zone simulator, probability chart, combat math, playbook, research report. No build step, no server code. | Double-click `website/index.html` |
+| `website/` | Static site: zone simulator, probability chart, combat math, playbook, research report. No build step, no server code. Live on Vercel. | Double-click `website/index.html` |
+| `desktop-app/` | The website as a Windows program (Electron): installer and portable `.exe`, works offline | `desktop-app/README.md` |
+| `android-app/` | The website as an Android app (Capacitor): `.apk`, works offline | `android-app/README.md` |
 | `research/` | Python toolkit: generative zone models, statistical test battery, Monte Carlo forecasting, CV circle fitting | `research/README.md` |
 | `workbook/` | Excel combat-math workbook and the script that generates it | `workbook/pubgm-combat-math.xlsx` |
-| `mobile-app/` | Expo SDK 57 app with the same four tools, for Android and iOS | `mobile-app/PUBLISHING.md` |
-| `scripts/` | Site maintenance: shared navigation, research-page generator, site checker | `docs/RUN_LOCALLY.md` |
-| `docs/` | How to run it locally, put it on Hostinger, and publish on GitHub | below |
+| `mobile-app/` | Native Expo SDK 57 rewrite of four tools, for the Android and iOS stores | `mobile-app/PUBLISHING.md` |
+| `scripts/` | Site maintenance: shared navigation, research-page generator, site checker, app icons | `docs/RUN_LOCALLY.md` |
+| `docs/` | How to run it locally, deploy it to Vercel or Hostinger, and publish on GitHub | below |
 
 ## Quick start (Windows)
 
-- **See the website:** double-click `website/index.html`, or `start-website.bat`
-  for a local server at `http://localhost:8000`.
+- **Use it online:** [zoneanalyst.vercel.app](https://zoneanalyst.vercel.app).
+- **Install it:** `Zone-Analyst-Setup.exe` for Windows or `Zone-Analyst.apk`
+  for Android, from the [latest release](https://github.com/Apurba94/zone-analyst/releases/latest).
+- **See the website from the source:** double-click `website/index.html`, or
+  `start-website.bat` for a local server at `http://localhost:8000`.
 - **Run the research tests:** in `research/`, `py -m pip install -r requirements.txt`
   then `py -m pytest tests -q`.
 - **Guides:** [run locally](docs/RUN_LOCALLY.md) ·
+  [Vercel](docs/DEPLOY_VERCEL.md) ·
   [deploy to Hostinger](docs/DEPLOY_HOSTINGER.md) ·
   [publish on GitHub](docs/GITHUB.md) ·
-  [build the app](mobile-app/PUBLISHING.md)
+  [Windows app](desktop-app/README.md) ·
+  [Android app](android-app/README.md) ·
+  [build the Expo app](mobile-app/PUBLISHING.md)
+
+## Releasing the apps
+
+The Windows and Android apps bundle `website/` when they are built, so a site
+change reaches them with the next release:
+
+1. Set the new version in `desktop-app/package.json`, `android-app/package.json`
+   and `android-app/android/app/build.gradle` (`versionName`, and raise
+   `versionCode` by one).
+2. Commit and push, then tag it: `git tag v1.0.1` and `git push origin v1.0.1`.
+3. GitHub Actions (**Desktop and Android apps**) builds the installer, the
+   portable `.exe` and the signed `.apk`, and publishes them as a release. The
+   download buttons on the website always point at the latest one.
+
+The website itself redeploys on Vercel with every push to `main`.
 
 ## Three findings
 
@@ -57,9 +86,13 @@ gives the method and evidence behind each.
 | | Browser combat model vs spreadsheet | identical on every compared figure |
 | | Browser vs Python verdicts, 200 browser-generated tournaments | 199 agree; the one split is a false alarm on uniform data, within both verdicts' 5% rate |
 | Workbook | LibreOffice recalculation | 630 formulas, 0 errors |
+| | Live on Vercel: every page, the workbook download, the 404 page | served; the deploy runs the site checker first |
+| Windows app | Built installer and portable `.exe`, launched, all 6 pages driven over DevTools | every page renders, no script errors |
+| Android app | Release APK built in GitHub Actions; signature checked with `apksigner` | ANDROID_ROW |
 | Mobile app | Full TypeScript check and Android bundle export (Expo SDK 57) | clean; 2.9 MB bundle |
 
-GitHub runs the research tests and the site checker on every push.
+GitHub runs the research tests and the site checker on every push, and builds
+both apps for every release tag.
 
 ## Honest status
 

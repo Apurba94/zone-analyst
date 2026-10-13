@@ -1,0 +1,5 @@
+node_modules/
+# Rebuilt from ../website by `npm run copy-web`
+www/
+# Release signing key and its passwords: keep a backup, never commit
+signing/

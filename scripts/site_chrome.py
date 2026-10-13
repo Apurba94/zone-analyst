@@ -116,7 +116,7 @@ FOOT = (
     "    <p>Independent analysis toolkit. Not affiliated with, endorsed by, or connected to "
     "KRAFTON, Tencent or PUBG Mobile. Zone models test a candidate algorithm from a published "
     "patent; weapon figures are community estimates, graded by confidence.</p>\n"
-    "    <p>© 2026 Janin A Apurba</p>\n"
+    '    <p>© 2026 Janin A Apurba · <a href="https://github.com/Apurba94/zone-analyst">Source on GitHub</a></p>\n'
     "  </div>\n"
     "</footer>\n"
     "<!-- /sz:foot -->"

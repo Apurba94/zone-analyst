@@ -1,0 +1,138 @@
+# Builds the Windows .exe and the Android .apk from website/.
+#
+#   Push a tag such as v1.0.1  -> builds both and publishes a GitHub Release.
+#                                 The website's "Get the app" buttons point at
+#                                 releases/latest/download/<file>, so they pick
+#                                 up the new release with no site change.
+#   Actions tab -> Run workflow -> builds both and keeps them on the run as
+#                                 artifacts for 30 days, without a release.
+#
+# Android signing reads the repository secrets ANDROID_KEYSTORE_BASE64 and
+# ANDROID_KEYSTORE_PASSWORD (android-app/README.md). Without them the APK is
+# signed with a throwaway debug key and the run shows a warning.
+
+name: Desktop and Android apps
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: apps-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    name: Windows .exe
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop-app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: desktop-app/package-lock.json
+      - run: npm ci
+      - run: npm run dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows
+          path: |
+            desktop-app/dist/Zone-Analyst-Setup.exe
+            desktop-app/dist/Zone-Analyst-Portable.exe
+          if-no-files-found: error
+          retention-days: 30
+
+  android:
+    name: Android .apk
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: android-app/package-lock.json
+      - run: npm ci
+      - name: Copy the website into the app
+        run: npm run sync
+
+      - name: Signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.p12"
+            echo "ZA_KEYSTORE_FILE=$RUNNER_TEMP/release.p12" >> "$GITHUB_ENV"
+          else
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set, so this APK is debug-signed and can't update an installed release."
+          fi
+
+      - name: Build the APK
+        working-directory: android-app/android
+        env:
+          ZA_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ZA_KEY_ALIAS: zoneanalyst
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/Zone-Analyst.apk"
+
+      - name: Check the signature
+        run: |
+          tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          "$tools/apksigner" verify --print-certs "$GITHUB_WORKSPACE/Zone-Analyst.apk"
+          "$tools/aapt2" dump badging "$GITHUB_WORKSPACE/Zone-Analyst.apk" | head -3
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android
+          path: Zone-Analyst.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: GitHub Release
+    needs: [windows, android]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: out
+          merge-multiple: true
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          cat > notes.md <<EOF
+          The Zone Analyst website (https://zoneanalyst.vercel.app), packaged to work offline.
+
+          | File | For |
+          |---|---|
+          | **Zone-Analyst-Setup.exe** | Windows 10 and 11, 64-bit. Installs with a Start menu shortcut and an uninstaller. |
+          | **Zone-Analyst-Portable.exe** | Windows, no install: run it from any folder or a USB stick. |
+          | **Zone-Analyst.apk** | Android 7 or newer. Open the file on the phone and allow installs from your browser when asked. |
+
+          Neither app carries a paid code-signing certificate. If Windows SmartScreen says it doesn't recognise the app, choose **More info → Run anyway**.
+          EOF
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" out/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" out/* --repo "$GITHUB_REPOSITORY" \
+              --title "Zone Analyst $TAG" --notes-file notes.md
+          fi

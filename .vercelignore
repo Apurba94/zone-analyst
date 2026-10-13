@@ -1,0 +1,11 @@
+# Vercel only needs the website and the checker that runs as its build step.
+.github
+android-app
+desktop-app
+docs
+mobile-app
+release
+research
+workbook
+*.bat
+*.sh

@@ -36,3 +36,5 @@ desktop.ini
 # Local secrets
 .env
 .env.*
+
+.vercel

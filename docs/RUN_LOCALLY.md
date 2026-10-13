@@ -59,11 +59,33 @@ file into `website\downloads\` too, so the site offers the same version.
 | Navigation or footer on every page | `scripts/site_chrome.py` | `py scripts\site_chrome.py` |
 | The research page | `research/docs/REPORT.md` | `py -m pip install markdown`, then `py scripts\build_research_page.py`, then `py scripts\site_chrome.py` |
 | Combat math numbers or logic | `mobile-app/src/combat.ts` (shared with the app) | `npx esbuild mobile-app/src/combat.ts --bundle --format=iife --global-name=ZoneCombat --target=es2019 --outfile=website/assets/combat-model.js` (needs [Node.js](https://nodejs.org)) |
+| App icons (Windows and Android) | `scripts/make_app_icons.py` | `py scripts\make_app_icons.py`, then `npm run icons` in `android-app` |
 | Anything | — | `py scripts\check_site.py` before uploading |
 
 `check_site.py` fails on any broken link, missing anchor, missing asset or
-unexpected external host. The GitHub checks and the Hostinger deploy both run
-it, so a broken page never reaches the server.
+unexpected external host. The GitHub checks, the Vercel deploy and the
+Hostinger deploy all run it, so a broken page never reaches a server.
+
+Pushing to `main` updates [zoneanalyst.vercel.app](https://zoneanalyst.vercel.app)
+by itself. The Windows and Android apps carry their own copy of the site, so
+they pick up changes at the next release (see the main README).
+
+## The Windows app
+
+```bat
+cd desktop-app
+npm install
+npm start          :: the site in the app window, straight from ..\website
+npm run dist       :: builds dist\Zone-Analyst-Setup.exe and dist\Zone-Analyst-Portable.exe
+```
+
+Details in `desktop-app/README.md`.
+
+## The Android app
+
+Building the APK needs JDK 21 and the Android SDK, so the easy route is GitHub:
+**Actions → Desktop and Android apps → Run workflow**, then download the APK
+from the run's **Artifacts**. Building it locally is in `android-app/README.md`.
 
 ## The mobile app
 

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Zone Analyst</string>
+    <string name="title_activity_main">Zone Analyst</string>
+    <string name="package_name">io.github.apurba94.zoneanalyst</string>
+    <string name="custom_url_scheme">io.github.apurba94.zoneanalyst</string>
+</resources>

@@ -1,0 +1,60 @@
+{
+  "name": "zone-analyst-desktop",
+  "productName": "Zone Analyst",
+  "version": "1.0.0",
+  "description": "Zone Analyst for Windows: the website's zone simulator, probability chart, combat math and playbook, offline.",
+  "author": "Janin A Apurba",
+  "homepage": "https://zoneanalyst.vercel.app",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "io.github.apurba94.zoneanalyst",
+    "productName": "Zone Analyst",
+    "copyright": "© 2026 Janin A Apurba",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "build/icon.png"
+    ],
+    "extraResources": [
+      {
+        "from": "../website",
+        "to": "website",
+        "filter": [
+          "**/*",
+          "!.htaccess",
+          "!robots.txt"
+        ]
+      }
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Zone Analyst",
+      "artifactName": "Zone-Analyst-Setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "Zone-Analyst-Portable.${ext}"
+    }
+  }
+}
