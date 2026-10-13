@@ -88,7 +88,7 @@ gives the method and evidence behind each.
 | Workbook | LibreOffice recalculation | 630 formulas, 0 errors |
 | | Live on Vercel: every page, the workbook download, the 404 page | served; the deploy runs the site checker first |
 | Windows app | Built installer and portable `.exe`, launched, all 6 pages driven over DevTools | every page renders, no script errors |
-| Android app | Release APK built in GitHub Actions; signature checked with `apksigner` | ANDROID_ROW |
+| Android app | Release APK built in GitHub Actions; signature checked with `apksigner` | builds clean; signed with the release key (v2 signature verified); Android 7+ (min SDK 24), target SDK 36. Not yet tried on a physical phone |
 | Mobile app | Full TypeScript check and Android bundle export (Expo SDK 57) | clean; 2.9 MB bundle |
 
 GitHub runs the research tests and the site checker on every push, and builds
